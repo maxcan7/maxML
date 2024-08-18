@@ -1,0 +1,7 @@
+.coverage
+.pytest_cache
+__pycache__/
+build/
+coverage.xml
+dist/
+maxML.egg-info

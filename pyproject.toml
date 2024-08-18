@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools >= 61.0"]
+build-backend = "setuptools.build_meta"
+
+
+[project]
+name = "maxML"
+dynamic = ["version"]
+description = "An ML framework built on top of scikit-learn Pipelines"
+readme = "README.md"
+requires-python = ">=3.12"
+
+authors = [
+  {name = "Max Cantor", email = "maxcan7@gmail.com" }
+]
+maintainers = [
+  {name = "Max Cantor", email = "maxcan7@gmail.com" }
+]
+
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3 :: Only",
+]
+
+dependencies = [
+  "pandas>=2.2.2",
+  "pydantic>=2.8.2",
+  "scikit-learn>=1.5.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "black>=24.8.0",
+    "flake8>=7.1.1",
+    "mypy>=1.11.1",
+    "pre-commit>=3.8.0",
+    "pytest>=8.3.2",
+    "reorder-python-imports>=3.13.0",
+]
