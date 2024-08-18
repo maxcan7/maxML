@@ -137,6 +137,8 @@ def main() -> None:
         model=LogisticRegression(), preprocessor=preprocessor
     )
 
+    # TODO: Parameterize this out. "Purchased" as a target variable does not
+    # make sense for the linear model since it is binary.
     X = get_X(df=df, target="Purchased")
     y = get_y(df=df, target="Purchased")
     X_train, X_test, y_train, y_test = train_test_split(
