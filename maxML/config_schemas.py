@@ -5,7 +5,11 @@ from pydantic import field_validator
 from sklearn.base import BaseEstimator
 
 
-class PipelineModel(BaseModel):
+class PipelineConfig(BaseModel):
+    """
+    Pydantic schema for parsing and validating a maxML pipeline config.
+    """
+
     sklearn_model: str
     input_path: str
     target: str

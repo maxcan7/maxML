@@ -1,12 +1,12 @@
+import sys
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import yaml
 from sklearn.base import BaseEstimator
 from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
-from sklearn.linear_model import LinearRegression
-from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import classification_report
 from sklearn.metrics import mean_squared_error
@@ -17,6 +17,8 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing import OrdinalEncoder
 from sklearn.preprocessing import StandardScaler
+
+from maxML.config_schemas import PipelineConfig
 
 
 """
@@ -115,54 +117,49 @@ def create_preprocessor() -> ColumnTransformer:
     return ColumnTransformer(transformers=[numeric, nominal, ordinal])
 
 
-def load_data() -> pd.DataFrame:
-    """TODO: Configure"""
-    data_path = Path.cwd() / "data/gemini_sample_data.csv"
-    return pd.read_csv(data_path)
+def load_data(input_path: str) -> pd.DataFrame:
+    """Load data from input_path as pandas DataFrame."""
+    return pd.read_csv(Path.cwd() / input_path)
 
 
-def main() -> None:
+def main(pipeline_config_path: str) -> None:
     """
-    Run sklearn pipelines for linear and logistic regression on dataset
-    with preprocessing steps.
+    Run sklearn pipelines on dataset with preprocessing steps.
     """
-    df = load_data()
+    pipeline_config = PipelineConfig(
+        **yaml.safe_load(open(Path.cwd() / pipeline_config_path))
+    )
+    df = load_data(pipeline_config.input_path)
     preprocessor = create_preprocessor()
 
-    linear_pipeline = create_model_pipeline(
-        model=LinearRegression(), preprocessor=preprocessor
-    )
-    logistic_pipeline = create_model_pipeline(
-        model=LogisticRegression(), preprocessor=preprocessor
+    pipeline = create_model_pipeline(
+        model=pipeline_config.sklearn_model, preprocessor=preprocessor
     )
 
-    # TODO: Parameterize this out. "Purchased" as a target variable does not
-    # make sense for the linear model since it is binary.
-    X = get_X(df=df, target="Purchased")
-    y = get_y(df=df, target="Purchased")
+    X = get_X(df=df, target=pipeline_config.target)
+    y = get_y(df=df, target=pipeline_config.target)
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.2, random_state=42
     )
 
-    linear_pipeline.fit(X_train, y_train)
-    logistic_pipeline.fit(X_train, y_train)
+    pipeline.fit(X_train, y_train)
+    predictions = pipeline.predict(X_test)
 
-    linear_predictions = linear_pipeline.predict(X_test)
-    logistic_predictions = logistic_pipeline.predict(X_test)
+    # TODO: Abstract out evaluate logic.
+    # linear_metrics = evaluate_linear(
+    #     y_test=y_test, X_test=X_test, predictions=linear_predictions
+    # )
+    # print("Linear Regression:")
+    # print(f"  MSE: {linear_metrics['mse']:.2f}")
+    # print(f"  RMSE: {linear_metrics['rmse']:.2f}")
+    # print(f"  R-squared: {linear_metrics['r2']:.2f}")
 
-    linear_metrics = evaluate_linear(
-        y_test=y_test, X_test=X_test, predictions=linear_predictions
-    )
-    print("Linear Regression:")
-    print(f"  MSE: {linear_metrics['mse']:.2f}")
-    print(f"  RMSE: {linear_metrics['rmse']:.2f}")
-    print(f"  R-squared: {linear_metrics['r2']:.2f}")
-
+    # TODO: Abstract out evaluate logic.
     logistic_metrics = evaluate_logistic(
         y_test=y_test,
         X_test=X_test,
-        pipeline=logistic_pipeline,
-        predictions=logistic_predictions,
+        pipeline=pipeline,
+        predictions=predictions,
     )
     print("\nLogistic Regression:")
     print(f"  Accuracy: {logistic_metrics['accuracy']:.2f}")
@@ -171,4 +168,8 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        pipeline_config_path = sys.argv[1]
+    except IndexError:
+        raise
+    main(pipeline_config_path)
