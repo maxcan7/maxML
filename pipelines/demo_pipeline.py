@@ -32,7 +32,6 @@ def evaluate_logistic(
     predictions: np.ndarray,
 ) -> dict:
     """TODO: configure"""
-    breakpoint
     accuracy = accuracy_score(y_test, predictions)
     report = classification_report(y_test, predictions)
     roc_auc = roc_auc_score(y_test, pipeline.predict_proba(X_test)[:, 1])
