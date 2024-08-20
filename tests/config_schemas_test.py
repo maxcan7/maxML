@@ -7,7 +7,6 @@ from maxML.config_schemas import load_config
 from maxML.config_schemas import PipelineConfig
 
 
-# TODO: Add test case defined by no preprocessors.
 @pytest.mark.parametrize(
     "pipeline_config_path, model_estimator",
     [
@@ -16,9 +15,13 @@ from maxML.config_schemas import PipelineConfig
             LogisticRegression,
             id="logistic_model",
         ),
-        # NOTE: Currently tests with no preprocessors but that should be its own case.
         pytest.param(
             "tests/test_configs/linear_model.yaml", LinearRegression, id="linear_model"
+        ),
+        pytest.param(
+            "tests/test_configs/no_preprocessing.yaml",
+            LogisticRegression,
+            id="no_preprocessing",
         ),
     ],
 )

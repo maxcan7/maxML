@@ -15,7 +15,6 @@ from tests.conftest import logistic_preprocessor_fixture
             logistic_preprocessor_fixture(),
             id="logistic_model",
         ),
-        # TODO: Add linear_preprocessor fixture
     ],
 )
 def test_ColumnTransformerPreprocessor(
