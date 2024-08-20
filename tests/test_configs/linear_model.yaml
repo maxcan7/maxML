@@ -1,0 +1,7 @@
+sklearn_model: sklearn.linear_model.LinearRegression
+input_path: data/gemini_sample_data.csv
+target: Years_of_Experience
+metrics:
+  - mse
+  - rmse
+  - r2

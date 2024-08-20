@@ -1,0 +1,2 @@
+# Set line length to match black
+max-line-length = 88
