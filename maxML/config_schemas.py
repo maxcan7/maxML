@@ -1,5 +1,8 @@
 import importlib
+from pathlib import Path
+from typing import Any
 
+import yaml
 from pydantic import BaseModel
 from pydantic import field_validator
 from sklearn.base import BaseEstimator
@@ -13,6 +16,8 @@ class PipelineConfig(BaseModel):
     sklearn_model: str
     input_path: str
     target: str
+    # TODO: Break out preprocessing into its own pydantic schema.
+    preprocessing: dict[str, list[dict[Any, Any]]] | None = None
     metrics: list[str]
 
     @field_validator("sklearn_model", mode="after")
@@ -26,3 +31,10 @@ class PipelineConfig(BaseModel):
         module_obj = importlib.import_module(module_name)
         function_name = sklearn_model.split(".")[-1]
         return getattr(module_obj, function_name)()
+
+
+def load_config(config_class: BaseModel, model_config_path: str) -> BaseModel:
+    """
+    Load yaml config, parse and validate with config_class schema.
+    """
+    return config_class(**yaml.safe_load(open(Path.cwd() / model_config_path)))
