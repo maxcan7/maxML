@@ -1,7 +1,9 @@
 import importlib
+from collections.abc import Callable
 from functools import partial
 from typing import Protocol
 
+from sklearn.base import BaseEstimator
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import FeatureUnion
 from sklearn.pipeline import Pipeline
@@ -11,6 +13,16 @@ from maxML.config_schemas import PipelineConfig
 
 # TODO: Add FeatureUnionPreprocessor
 # NOTE: May be able to consolidate them instead?
+
+
+def get_estimator_fn(module_str: str) -> Callable[[str], BaseEstimator]:
+    """
+    Parses the module_str, imports the module, and returns the function.
+    """
+    module_name = ".".join(module_str.split(".")[:-1])
+    module_obj = importlib.import_module(module_name)
+    function_name = module_str.split(".")[-1]
+    return getattr(module_obj, function_name)
 
 
 class Preprocessor(Protocol):
@@ -32,13 +44,10 @@ class ColumnTransformerPreprocessor:
         for pipeline in pipeline_config.preprocessing.pipelines:  # type: ignore
             steps_buffer = []
             for pipe_step in pipeline["steps"]:
-                module_name = ".".join(pipe_step["sklearn_module"].split(".")[:-1])
-                module_obj = importlib.import_module(module_name)
-                function_name = pipe_step["sklearn_module"].split(".")[-1]
-                estimator_fn = getattr(module_obj, function_name)
+                estimator_fn = get_estimator_fn(pipe_step["sklearn_module"])
                 if "args" in pipe_step.keys():
                     estimator_fn = partial(estimator_fn, **pipe_step["args"])
-                estimator = (pipe_step["name"], estimator_fn())
+                estimator = (pipe_step["name"], estimator_fn())  # type: ignore
                 steps_buffer.append(estimator)
             transformer = (
                 pipeline["name"],
