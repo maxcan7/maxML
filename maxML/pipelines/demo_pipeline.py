@@ -15,12 +15,14 @@ from sklearn.pipeline import Pipeline
 
 from maxML.config_schemas import load_config
 from maxML.config_schemas import PipelineConfig
-from maxML.preprocessors import ColumnTransformerPreprocessor
+from maxML.preprocessors import get_preprocessor
 
 
 """
 demo_pipeline for running an sklearn model pipeline end-to-end using maxML.
 """
+# TODO: Remove pipelines subdir and turn this into an execution/runner script.
+# TODO: Rename "pipeline" as it's easy to confuse with Pipeline.
 
 
 def evaluate_logistic(
@@ -84,8 +86,9 @@ def main(pipeline_config_path: str) -> None:
     """
     pipeline_config = load_config(PipelineConfig, pipeline_config_path)
     df = load_data(pipeline_config.input_path)
-    # TODO: Abstract this to handle any Preprocessor.
-    preprocessor = ColumnTransformerPreprocessor.compose(pipeline_config)
+
+    # TODO: Add handling for when preprocessor is None.
+    preprocessor = get_preprocessor(pipeline_config)
 
     pipeline = create_model_pipeline(
         model=pipeline_config.sklearn_model, preprocessor=preprocessor
@@ -94,7 +97,7 @@ def main(pipeline_config_path: str) -> None:
     X = get_X(df=df, target=pipeline_config.target)
     y = get_y(df=df, target=pipeline_config.target)
     X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=42
+        X, y, test_size=0.2, random_state=42  # TODO: Configure
     )
 
     pipeline.fit(X_train, y_train)

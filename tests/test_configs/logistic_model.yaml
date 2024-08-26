@@ -3,6 +3,8 @@ input_path: data/gemini_sample_data.csv
 target: Purchased
 
 preprocessing:
+  preprocessor: ColumnTransformerPreprocessor
+
   pipelines:
 
   - name: numeric

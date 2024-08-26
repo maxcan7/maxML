@@ -1,0 +1,9 @@
+sklearn_model: sklearn.linear_model.LogisticRegression
+input_path: data/gemini_sample_data.csv
+target: Purchased
+metrics:
+  - accuracy_score
+  - classification_report
+  - roc_auc_score
+preprocessing:
+  pipelines: foo

@@ -22,9 +22,13 @@ class Preprocessor(Protocol):
 class ColumnTransformerPreprocessor:
     @staticmethod
     def compose(pipeline_config: PipelineConfig) -> ColumnTransformer:
+        """
+        Parses the pipelines dicts into their Estimators and composes a
+        ColumnTransformer.
+        """
         transformers = []
         # TODO: Resolve mypy error relating to config_schema preprocessing field type.
-        for pipeline in pipeline_config.preprocessing["pipelines"]:  # type: ignore
+        for pipeline in pipeline_config.preprocessing.pipelines:  # type: ignore
             steps_buffer = []
             for pipe_step in pipeline["steps"]:
                 module_name = ".".join(pipe_step["sklearn_module"].split(".")[:-1])
@@ -43,3 +47,20 @@ class ColumnTransformerPreprocessor:
             )
             transformers.append(transformer)
         return ColumnTransformer(transformers=transformers)
+
+
+PREPROCESSORS = {"ColumnTransformerPreprocessor": ColumnTransformerPreprocessor}
+
+
+def get_preprocessor(pipeline_config: PipelineConfig) -> Preprocessor | None:
+    """
+    Return Preprocessor module as defined in preprocessor field in config.
+    Validation of preprocessor handled in PipelineConfig.
+    """
+    if pipeline_config.preprocessing:
+        preprocessor_type = pipeline_config.preprocessing.preprocessor
+        return PREPROCESSORS[preprocessor_type]
+    else:
+        # TODO: Implement as logging, monad, or Exception.
+        print("No preprocessing field found in pipeline config.")
+        return None
