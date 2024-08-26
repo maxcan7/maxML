@@ -19,10 +19,8 @@ from maxML.preprocessors import get_preprocessor
 
 
 """
-demo_pipeline for running an sklearn model pipeline end-to-end using maxML.
+Runner script for an end-to-end sklearn model pipeline using maxML.
 """
-# TODO: Remove pipelines subdir and turn this into an execution/runner script.
-# TODO: Rename "pipeline" as it's easy to confuse with Pipeline.
 
 
 def evaluate_logistic(
@@ -89,6 +87,7 @@ def main(pipeline_config_path: str) -> None:
 
     # TODO: Add handling for when preprocessor is None.
     preprocessor = get_preprocessor(pipeline_config)
+    preprocessor = preprocessor.compose(pipeline_config)  # type: ignore
 
     pipeline = create_model_pipeline(
         model=pipeline_config.sklearn_model, preprocessor=preprocessor
