@@ -1,4 +1,5 @@
 import importlib
+from functools import partial
 from typing import Protocol
 
 from sklearn.compose import ColumnTransformer
@@ -36,9 +37,8 @@ class ColumnTransformerPreprocessor:
                 function_name = pipe_step["sklearn_module"].split(".")[-1]
                 estimator_fn = getattr(module_obj, function_name)
                 if "args" in pipe_step.keys():
-                    estimator = (pipe_step["name"], estimator_fn(**pipe_step["args"]))
-                else:
-                    estimator = (pipe_step["name"], estimator_fn())
+                    estimator_fn = partial(estimator_fn, **pipe_step["args"])
+                estimator = (pipe_step["name"], estimator_fn())
                 steps_buffer.append(estimator)
             transformer = (
                 pipeline["name"],
