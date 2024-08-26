@@ -1,6 +1,7 @@
 import importlib
 from pathlib import Path
 from typing import Any
+from typing import TypeVar
 
 import yaml
 from pydantic import BaseModel
@@ -8,6 +9,7 @@ from pydantic import field_validator
 from sklearn.base import BaseEstimator
 
 
+ModelType = TypeVar("ModelType", bound=BaseModel)
 PREPROCESSORS = ["ColumnTransformerPreprocessor"]
 
 
@@ -28,6 +30,7 @@ class PipelineConfig(BaseModel):
     metrics: list[str]
 
     @field_validator("sklearn_model", mode="after")
+    @staticmethod
     def retrieve_model_type(sklearn_model: str) -> BaseEstimator:
         """
         Given that BaseEstimator is not supported by pydantic-core, convert
@@ -40,6 +43,7 @@ class PipelineConfig(BaseModel):
         return getattr(module_obj, function_name)()
 
     @field_validator("preprocessing", mode="before")
+    @staticmethod
     def validate_preprocessor(
         preprocessing: dict[str, str | list[dict[Any, Any]]] | None,
     ) -> PreprocessingConfig | None:
@@ -52,7 +56,7 @@ class PipelineConfig(BaseModel):
         return PreprocessingConfig(**preprocessing)
 
 
-def load_config(config_class: BaseModel, model_config_path: str) -> BaseModel:
+def load_config(config_class: type[ModelType], model_config_path: str) -> ModelType:
     """
     Load yaml config, parse and validate with config_class schema.
     """

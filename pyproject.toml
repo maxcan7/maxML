@@ -40,3 +40,6 @@ dev = [
 
 [tool.setuptools]
 packages = ["maxML"]
+
+[tool.mypy]
+plugins = ["pydantic.mypy"]

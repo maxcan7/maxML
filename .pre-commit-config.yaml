@@ -21,7 +21,7 @@ repos:
     rev: v1.11.1
     hooks:
     -   id: mypy
-        additional_dependencies: [types-PyYAML]
+        additional_dependencies: [types-PyYAML, pydantic]
 -   repo: https://github.com/asottile/reorder-python-imports
     rev: v3.13.0
     hooks:
