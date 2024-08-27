@@ -36,7 +36,7 @@ def logistic_preprocessor_fixture() -> ColumnTransformer:
                 OrdinalEncoder(
                     categories=[ed_categories],
                     handle_unknown="use_encoded_value",
-                    unknown_value="np.nan",
+                    unknown_value=np.nan,
                 ),
             ),
         ]

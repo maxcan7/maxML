@@ -60,4 +60,9 @@ def load_config(config_class: type[ModelType], model_config_path: str) -> ModelT
     """
     Load yaml config, parse and validate with config_class schema.
     """
-    return config_class(**yaml.safe_load(open(Path.cwd() / model_config_path)))
+    # NOTE: Using FullLoader to automatically parse python object pyyaml tags e.g.
+    # !!python/name:numpy.nan
+    # TODO: Is there a safer yet equally flexible way to do this?
+    return config_class(
+        **yaml.load(open(Path.cwd() / model_config_path), Loader=yaml.FullLoader)
+    )

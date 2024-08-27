@@ -50,7 +50,7 @@ preprocessing:
             - Master's
             - PhD
         handle_unknown: use_encoded_value
-        unknown_value: np.nan
+        unknown_value: !!python/name:numpy.nan
     columns:
       - Education
 
