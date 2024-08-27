@@ -78,7 +78,7 @@ def load_data(input_path: str) -> pd.DataFrame:
     return pd.read_csv(Path.cwd() / input_path)
 
 
-def main(pipeline_config_path: str) -> None:
+def run(pipeline_config_path: str) -> None:
     """
     Run sklearn pipelines on dataset with preprocessing steps.
     """
@@ -129,4 +129,4 @@ if __name__ == "__main__":
         pipeline_config_path = sys.argv[1]
     except IndexError:
         raise
-    main(pipeline_config_path)
+    run(pipeline_config_path)
