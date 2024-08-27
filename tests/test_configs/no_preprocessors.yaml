@@ -5,3 +5,4 @@ metrics:
   - accuracy_score
   - classification_report
   - roc_auc_score
+preprocessors:

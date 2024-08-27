@@ -7,7 +7,7 @@ from sklearn.preprocessing import OrdinalEncoder
 from sklearn.preprocessing import StandardScaler
 
 
-def logistic_preprocessor_fixture() -> ColumnTransformer:
+def columntransformer_preprocessor_fixture() -> ColumnTransformer:
     """Hard-coded ColumnTransformer fixture."""
     numeric_pipeline = Pipeline(
         [

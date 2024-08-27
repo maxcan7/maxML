@@ -15,6 +15,7 @@ from sklearn.pipeline import Pipeline
 
 from maxML.config_schemas import load_config
 from maxML.config_schemas import PipelineConfig
+from maxML.preprocessors import do_preprocessing
 from maxML.preprocessors import get_preprocessor
 
 
@@ -80,15 +81,18 @@ def load_data(input_path: str) -> pd.DataFrame:
 
 def run(pipeline_config_path: str) -> None:
     """
-    Run sklearn pipelines on dataset with preprocessing steps.
+    Run sklearn pipelines on dataset with preprocessors steps.
     """
     pipeline_config = load_config(PipelineConfig, pipeline_config_path)
     df = load_data(pipeline_config.input_path)
 
-    # TODO: Add handling for when preprocessor is None.
-    preprocessor = get_preprocessor(pipeline_config)
-    preprocessor = preprocessor.compose(pipeline_config)  # type: ignore
+    # TODO: Actually make this work with multiple preprocessors
+    for preprocessor_config in pipeline_config.preprocessors:
+        if do_preprocessing(preprocessor_config):
+            preprocessor = get_preprocessor(preprocessor_config)
+            preprocessor = preprocessor.compose(preprocessor_config)
 
+    # TODO: Add handling for when preprocessor is None.
     pipeline = create_model_pipeline(
         model=pipeline_config.sklearn_model, preprocessor=preprocessor
     )

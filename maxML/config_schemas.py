@@ -1,5 +1,6 @@
 from pathlib import Path
 from typing import Any
+from typing import Optional
 from typing import TypeVar
 
 import yaml
@@ -11,12 +12,15 @@ from maxML.utils import get_estimator_fn
 
 
 ModelType = TypeVar("ModelType", bound=BaseModel)
-PREPROCESSORS = ["ColumnTransformerPreprocessor"]
+PREPROCESSORS = ["ColumnTransformerPreprocessor", "FeatureUnionPreprocessor"]
+
+PIPELINES_DICT_TYPE = list[dict[Any, Any]]
+PREPROCESSORS_LIST_TYPE = list[dict[str, str | PIPELINES_DICT_TYPE]]
 
 
-class PreprocessingConfig(BaseModel):
-    preprocessor: str
-    pipelines: list[dict[Any, Any]]
+class PreprocessorConfig(BaseModel):
+    preprocessor: Optional[str] = None
+    pipelines: Optional[PIPELINES_DICT_TYPE] = None
 
 
 class PipelineConfig(BaseModel):
@@ -27,7 +31,7 @@ class PipelineConfig(BaseModel):
     sklearn_model: str
     input_path: str
     target: str
-    preprocessing: PreprocessingConfig | None = None
+    preprocessors: list[PreprocessorConfig]
     metrics: list[str]
 
     @field_validator("sklearn_model", mode="after")
@@ -40,18 +44,21 @@ class PipelineConfig(BaseModel):
         """
         return get_estimator_fn(sklearn_model)()
 
-    @field_validator("preprocessing", mode="before")
+    @field_validator("preprocessors", mode="before")
     @staticmethod
     def validate_preprocessor(
-        preprocessing: dict[str, str | list[dict[Any, Any]]] | None,
-    ) -> PreprocessingConfig | None:
-        if not preprocessing:
-            return None
-        if "preprocessor" not in preprocessing.keys():
-            raise KeyError("preprocessing dict must contain a preprocessor key.")
-        if preprocessing["preprocessor"] not in PREPROCESSORS:
-            raise KeyError(f"preprocessor must be in {PREPROCESSORS}.")
-        return PreprocessingConfig(**preprocessing)
+        preprocessors: PREPROCESSORS_LIST_TYPE,
+    ) -> list[PreprocessorConfig]:
+        preprocessor_configs = []
+        if not preprocessors:
+            return [PreprocessorConfig()]
+        for preprocessor in preprocessors:
+            if "preprocessor" not in preprocessor.keys():
+                raise KeyError("preprocessors dict must contain a preprocessor key.")
+            if preprocessor["preprocessor"] not in PREPROCESSORS:
+                raise KeyError(f"preprocessor must be in {PREPROCESSORS}.")
+            preprocessor_configs.append(PreprocessorConfig(**preprocessor))
+        return preprocessor_configs
 
 
 def load_config(config_class: type[ModelType], model_config_path: str) -> ModelType:

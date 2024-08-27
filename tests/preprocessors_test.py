@@ -4,16 +4,17 @@ from sklearn.compose import ColumnTransformer
 from maxML.config_schemas import load_config
 from maxML.config_schemas import PipelineConfig
 from maxML.preprocessors import ColumnTransformerPreprocessor
+from maxML.preprocessors import do_preprocessing
 from maxML.preprocessors import get_preprocessor
 from maxML.preprocessors import Preprocessor
-from tests.conftest import logistic_preprocessor_fixture
+from tests.conftest import columntransformer_preprocessor_fixture
 
 
 @pytest.mark.parametrize(
     "pipeline_config_path, expected_preprocessor",
     [
         pytest.param(
-            "tests/test_configs/logistic_model.yaml",
+            "tests/test_configs/columntransformer_logistic.yaml",
             ColumnTransformerPreprocessor,
             id="column_transformer_preprocessor",
         ),
@@ -27,17 +28,54 @@ def test_get_preprocessor(
     PipelineConfig params.
     """
     pipeline_config = load_config(PipelineConfig, pipeline_config_path)
-    preprocessor = get_preprocessor(pipeline_config)
+    preprocessor = get_preprocessor(pipeline_config.preprocessors[0])
     assert preprocessor == expected_preprocessor
+
+
+@pytest.mark.parametrize(
+    "pipeline_config_path",
+    [
+        pytest.param(
+            "tests/test_configs/no_preprocessors.yaml",
+            id="no_preprocessors",
+        ),
+    ],
+)
+def test_do_preprocessing(pipeline_config_path: str):
+    """
+    Test that if both the PreprocessorConfig preprocessor and pipelines fields are None,
+    do_preprocessing returns False.
+    """
+    pipeline_config = load_config(PipelineConfig, pipeline_config_path)
+    assert not do_preprocessing(pipeline_config.preprocessors[0])
+
+
+@pytest.mark.parametrize(
+    "pipeline_config_path",
+    [
+        pytest.param(
+            "tests/test_configs/no_preprocessors.yaml",
+            id="no_preprocessors",
+        ),
+    ],
+)
+def test_get_preprocessor_invalid(pipeline_config_path: str):
+    """
+    Test that the get_preprocessor function will return a KeyError if the preprocessor
+    or pipelines fields are None.
+    """
+    pipeline_config = load_config(PipelineConfig, pipeline_config_path)
+    with pytest.raises(KeyError):
+        get_preprocessor(pipeline_config.preprocessors[0])
 
 
 @pytest.mark.parametrize(
     "pipeline_config_path, preprocessor_fixture",
     [
         pytest.param(
-            "tests/test_configs/logistic_model.yaml",
-            logistic_preprocessor_fixture(),
-            id="logistic_model",
+            "tests/test_configs/columntransformer_logistic.yaml",
+            columntransformer_preprocessor_fixture(),
+            id="column_transformer_preprocessor",
         ),
     ],
 )
@@ -49,7 +87,9 @@ def test_ColumnTransformerPreprocessor_compose(
     ColumnTransformer.
     """
     pipeline_config = load_config(PipelineConfig, pipeline_config_path)
-    preprocessor = ColumnTransformerPreprocessor.compose(pipeline_config)
+    preprocessor = ColumnTransformerPreprocessor.compose(
+        pipeline_config.preprocessors[0]
+    )
     # TODO: Figure out a way to compare these two objects effectively.
     assert preprocessor
     assert preprocessor_fixture
