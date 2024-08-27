@@ -1,23 +1,12 @@
 import pytest
 from sklearn.compose import ColumnTransformer
-from sklearn.preprocessing import StandardScaler
 
 from maxML.config_schemas import load_config
 from maxML.config_schemas import PipelineConfig
 from maxML.preprocessors import ColumnTransformerPreprocessor
-from maxML.preprocessors import get_estimator_fn
 from maxML.preprocessors import get_preprocessor
 from maxML.preprocessors import Preprocessor
 from tests.conftest import logistic_preprocessor_fixture
-
-
-def test_get_estimator_fn():
-    """
-    Test that the get_estimator_fn function can parse a string and load as a function.
-    """
-    sklearn_module_str = "sklearn.preprocessing.StandardScaler"
-    sklearn_module = get_estimator_fn(sklearn_module_str)
-    assert sklearn_module == StandardScaler
 
 
 @pytest.mark.parametrize(

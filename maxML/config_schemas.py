@@ -1,4 +1,3 @@
-import importlib
 from pathlib import Path
 from typing import Any
 from typing import TypeVar
@@ -7,6 +6,8 @@ import yaml
 from pydantic import BaseModel
 from pydantic import field_validator
 from sklearn.base import BaseEstimator
+
+from maxML.utils import get_estimator_fn
 
 
 ModelType = TypeVar("ModelType", bound=BaseModel)
@@ -37,10 +38,7 @@ class PipelineConfig(BaseModel):
         the sklearn_model str to an sklearn model Estimator through pydantic
         field validation after parsing.
         """
-        module_name = ".".join(sklearn_model.split(".")[:-1])
-        module_obj = importlib.import_module(module_name)
-        function_name = sklearn_model.split(".")[-1]
-        return getattr(module_obj, function_name)()
+        return get_estimator_fn(sklearn_model)()
 
     @field_validator("preprocessing", mode="before")
     @staticmethod

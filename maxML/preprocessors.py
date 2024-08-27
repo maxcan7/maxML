@@ -1,28 +1,16 @@
-import importlib
-from collections.abc import Callable
 from functools import partial
 from typing import Protocol
 
-from sklearn.base import BaseEstimator
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import FeatureUnion
 from sklearn.pipeline import Pipeline
 
 from maxML.config_schemas import PipelineConfig
+from maxML.utils import get_estimator_fn
 
 
 # TODO: Add FeatureUnionPreprocessor
 # NOTE: May be able to consolidate them instead?
-
-
-def get_estimator_fn(module_str: str) -> Callable[[str], BaseEstimator]:
-    """
-    Parses the module_str, imports the module, and returns the function.
-    """
-    module_name = ".".join(module_str.split(".")[:-1])
-    module_obj = importlib.import_module(module_name)
-    function_name = module_str.split(".")[-1]
-    return getattr(module_obj, function_name)
 
 
 class Preprocessor(Protocol):
