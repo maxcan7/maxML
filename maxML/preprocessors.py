@@ -1,4 +1,5 @@
 from functools import partial
+from typing import Optional
 from typing import Protocol
 
 from sklearn.base import BaseEstimator
@@ -10,9 +11,65 @@ from maxML.config_schemas import PreprocessorConfig
 from maxML.utils import get_estimator_fn
 
 
+class Preprocessor(Protocol):
+    @staticmethod
+    def compose(
+        preprocessor_config: PreprocessorConfig,
+        preprocessor: Optional[ColumnTransformer | FeatureUnion] = None,
+    ) -> ColumnTransformer | FeatureUnion:
+        """
+        Protocol defines the interface for all Preprocessors.
+        Inputs:
+        preprocessor_config: Config for composing a Preprocessor.
+        preprocessor: Another ColumnTransformer or FeatureUnion that can be added as a
+                      transformer to the next preprocessor such that all maxML
+                      Pipelines can expect a single preprocessor as the composition of
+                      all preprocessors.
+        """
+        ...
+
+
+class ColumnTransformerPreprocessor:
+    @staticmethod
+    def compose(
+        preprocessor_config: PreprocessorConfig,
+        preprocessor: Optional[Preprocessor] = None,
+    ) -> ColumnTransformer:
+        """
+        Parses the pipelines dicts into their Estimators and composes a
+        ColumnTransformer.
+        """
+        transformers = _compose(preprocessor_config)
+        if preprocessor:
+            transformers.insert(0, ("composed_preprocessor", preprocessor))
+        return ColumnTransformer(transformers=transformers)
+
+
+class FeatureUnionPreprocessor:
+    @staticmethod
+    def compose(
+        preprocessor_config: PreprocessorConfig,
+        preprocessor: Optional[Preprocessor] = None,
+    ) -> FeatureUnion:
+        """
+        Parses the pipelines dicts into their Estimators and composes a
+        FeatureUnion.
+        """
+        transformers = _compose(preprocessor_config)
+        if preprocessor:
+            transformers.insert(0, ("composed_preprocessor", preprocessor))
+        return FeatureUnion(transformer_list=transformers)
+
+
+PREPROCESSORS = {
+    "ColumnTransformerPreprocessor": ColumnTransformerPreprocessor,
+    "FeatureUnionPreprocessor": FeatureUnionPreprocessor,
+}
+
+
 def _compose(
     preprocessor_config: PreprocessorConfig,
-) -> list[tuple[str, BaseEstimator, list[str]]]:
+) -> list[tuple]:
     """
     Parses the pipelines dicts into their Estimators and returns the list of
     transformer tuples.
@@ -35,51 +92,7 @@ def _compose(
     return transformers
 
 
-class Preprocessor(Protocol):
-    @staticmethod
-    def compose(
-        preprocessor_config: PreprocessorConfig,
-    ) -> ColumnTransformer | FeatureUnion: ...
-
-
-class ColumnTransformerPreprocessor:
-    @staticmethod
-    def compose(preprocessor_config: PreprocessorConfig) -> ColumnTransformer:
-        """
-        Parses the pipelines dicts into their Estimators and composes a
-        ColumnTransformer.
-        """
-        transformers = _compose(preprocessor_config)
-        return ColumnTransformer(transformers=transformers)
-
-
-class FeatureUnionPreprocessor:
-    @staticmethod
-    def compose(preprocessor_config: PreprocessorConfig) -> FeatureUnion:
-        """
-        Parses the pipelines dicts into their Estimators and composes a
-        FeatureUnion.
-        """
-        transformers = _compose(preprocessor_config)
-        return FeatureUnion(transformer_list=transformers)
-
-
-PREPROCESSORS = {
-    "ColumnTransformerPreprocessor": ColumnTransformerPreprocessor,
-    "FeatureUnionPreprocessor": FeatureUnionPreprocessor,
-}
-
-
-def do_preprocessing(preprocessor_config: PreprocessorConfig) -> bool:
-    """
-    If both preprocessor and pipelines fields are None, then returns False.
-    This is used to determine whether or not to do preprocessing.
-    If only one is empty, it will raise a KeyError on get_preprocessor.
-    """
-    return any([preprocessor_config.preprocessor, preprocessor_config.pipelines])
-
-
-def get_preprocessor(preprocessor_config: PreprocessorConfig) -> Preprocessor:
+def get_preprocessor_fn(preprocessor_config: PreprocessorConfig) -> Preprocessor:
     """
     Return Preprocessor module as defined in preprocessor field in config.
     """
@@ -89,3 +102,36 @@ def get_preprocessor(preprocessor_config: PreprocessorConfig) -> Preprocessor:
         raise KeyError("preprocessor_config is missing pipelines field.")
     preprocessor_type = preprocessor_config.preprocessor
     return PREPROCESSORS[preprocessor_type]  # type: ignore
+
+
+def compose_preprocessor(
+    preprocessor_configs: list[PreprocessorConfig],
+) -> ColumnTransformer | FeatureUnion:
+    """
+    Loops over the list of preprocessor_configs, retrieves the appriate Preprocessor,
+    and composes the preprocessor instance i.e. ColumnTransformer or FeatureUnion.
+
+    If there are multiple preprocessors, each preceding preprocessor is composed into
+    the next, such that a single preprocessor as the composition of all preprocessors
+    is returned.
+    """
+    preprocessors: list = []
+    for i, preprocessor_config in enumerate(preprocessor_configs):
+        preprocessor_fn = get_preprocessor_fn(preprocessor_config)
+        compose_method = preprocessor_fn.compose
+        if preprocessors:
+            compose_method = partial(compose_method, preprocessor=preprocessors[i - 1])
+        preprocessors.append(compose_method(preprocessor_config=preprocessor_config))
+    return preprocessors[-1]
+
+
+def do_preprocessing(preprocessor_configs: list[PreprocessorConfig]) -> bool:
+    """
+    If both preprocessor and pipelines fields for the first PreprocessorConfig are None,
+    then returns False.
+    This is used to determine whether or not to do preprocessing.
+    If only one is empty, it will raise a KeyError on get_preprocessor.
+    """
+    return any(
+        [preprocessor_configs[0].preprocessor, preprocessor_configs[0].pipelines]
+    )

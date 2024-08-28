@@ -15,8 +15,8 @@ from sklearn.pipeline import Pipeline
 
 from maxML.config_schemas import load_config
 from maxML.config_schemas import PipelineConfig
+from maxML.preprocessors import compose_preprocessor
 from maxML.preprocessors import do_preprocessing
-from maxML.preprocessors import get_preprocessor
 
 
 """
@@ -86,11 +86,8 @@ def run(pipeline_config_path: str) -> None:
     pipeline_config = load_config(PipelineConfig, pipeline_config_path)
     df = load_data(pipeline_config.input_path)
 
-    # TODO: Actually make this work with multiple preprocessors
-    for preprocessor_config in pipeline_config.preprocessors:
-        if do_preprocessing(preprocessor_config):
-            preprocessor = get_preprocessor(preprocessor_config)
-            preprocessor = preprocessor.compose(preprocessor_config)
+    if do_preprocessing(pipeline_config.preprocessors):
+        preprocessor = compose_preprocessor(pipeline_config.preprocessors)
 
     # TODO: Add handling for when preprocessor is None.
     pipeline = create_model_pipeline(
@@ -103,6 +100,7 @@ def run(pipeline_config_path: str) -> None:
         X, y, test_size=0.2, random_state=42  # TODO: Configure
     )
 
+    # TODO: Add handling around fit_transform for feature_union.
     pipeline.fit(X_train, y_train)
     predictions = pipeline.predict(X_test)
 

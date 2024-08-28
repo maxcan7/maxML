@@ -1,9 +1,12 @@
 import numpy as np
 from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
+from sklearn.pipeline import FeatureUnion
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing import OrdinalEncoder
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.preprocessing import RobustScaler
 from sklearn.preprocessing import StandardScaler
 
 
@@ -43,3 +46,25 @@ def columntransformer_preprocessor_fixture() -> ColumnTransformer:
     )
     ordinal = ("ordinal", ordinal_pipeline, ["Education"])
     return ColumnTransformer(transformers=[numeric, nominal, ordinal])
+
+
+def featureunion_preprocessor_fixture() -> FeatureUnion:
+    """
+    Hard-coded FeatureUnion fixture which takes a ColumnTransformer as one of its
+    transformers in order to test both FeatureUnion and the ability of maxML
+    preprocessors to handle two Preprocessors.
+    """
+    columntransformer = ("columntransformer", columntransformer_preprocessor_fixture())
+    numeric_featureunion_pipeline = Pipeline(
+        [
+            ("robust_scaler", RobustScaler()),
+            ("poly", PolynomialFeatures(degree=2, include_bias=False)),
+        ]
+    )
+    numeric_featureunion_columns = ["Age", "Income", "Years_of_Experience"]
+    numeric_featureunion = (
+        "numeric",
+        numeric_featureunion_pipeline,
+        numeric_featureunion_columns,
+    )
+    return FeatureUnion(transformer_list=[columntransformer, numeric_featureunion])
