@@ -1,0 +1,28 @@
+sklearn_model: sklearn.linear_model.LogisticRegression
+input_path: data/gemini_sample_data.csv
+target: Purchased
+
+preprocessors:
+
+  - preprocessor: FeatureUnionPreprocessor
+
+    pipelines:
+
+    - name: numeric_featureunion
+      steps:
+      - name: robust_scaler
+        sklearn_module: sklearn.preprocessing.RobustScaler
+      - name: poly
+        sklearn_module: sklearn.preprocessing.PolynomialFeatures
+        args:
+          include_bias: False
+      columns:
+        - Age
+        - Income
+        - Years_of_Experience
+
+
+metrics:
+  - accuracy_score
+  - classification_report
+  - roc_auc_score

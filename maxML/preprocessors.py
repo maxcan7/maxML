@@ -2,7 +2,6 @@ from functools import partial
 from typing import Optional
 from typing import Protocol
 
-from sklearn.base import BaseEstimator
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import FeatureUnion
 from sklearn.pipeline import Pipeline

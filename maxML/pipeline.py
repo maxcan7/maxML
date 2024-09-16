@@ -100,7 +100,6 @@ def run(pipeline_config_path: str) -> None:
         X, y, test_size=0.2, random_state=42  # TODO: Configure
     )
 
-    # TODO: Add handling around fit_transform for feature_union.
     pipeline.fit(X_train, y_train)
     predictions = pipeline.predict(X_test)
 

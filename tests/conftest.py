@@ -58,7 +58,7 @@ def featureunion_preprocessor_fixture() -> FeatureUnion:
     numeric_featureunion_pipeline = Pipeline(
         [
             ("robust_scaler", RobustScaler()),
-            ("poly", PolynomialFeatures(degree=2, include_bias=False)),
+            ("poly", PolynomialFeatures(include_bias=False)),
         ]
     )
     numeric_featureunion_columns = ["Age", "Income", "Years_of_Experience"]
