@@ -67,6 +67,7 @@ Software Engineering:
 * Add release strategy.
 * Add model artifact support e.g. MLFlow.
 * Add containerization.
+* Update versioning to use git tags.
 
 
 ## Important Notes
