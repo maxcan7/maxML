@@ -5,6 +5,7 @@ import pandas as pd
 from sklearn.base import BaseEstimator
 from sklearn.compose import ColumnTransformer
 from sklearn.model_selection import train_test_split
+from sklearn.pipeline import FeatureUnion
 from sklearn.pipeline import Pipeline
 
 from maxML.config_schemas import load_config
@@ -31,7 +32,7 @@ def get_X(df: pd.DataFrame, target: str) -> pd.DataFrame:
 
 
 def create_model_pipeline(
-    model: BaseEstimator, preprocessor: ColumnTransformer = None
+    model: BaseEstimator, preprocessor: ColumnTransformer | FeatureUnion = None
 ) -> Pipeline:
     """TODO: Configure"""
     if not preprocessor:
