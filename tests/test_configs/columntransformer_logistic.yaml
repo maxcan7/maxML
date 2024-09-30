@@ -55,7 +55,9 @@ preprocessors:
       columns:
         - Education
 
-metrics:
-  - accuracy_score
-  - classification_report
-  - roc_auc_score
+evaluators:
+  - evaluator: LogisticEvaluator
+    metrics:
+      - accuracy_score
+      - classification_report
+      - roc_auc_score

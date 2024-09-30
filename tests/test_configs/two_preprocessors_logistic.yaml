@@ -72,8 +72,9 @@ preprocessors:
         - Income
         - Years_of_Experience
 
-
-metrics:
-  - accuracy_score
-  - classification_report
-  - roc_auc_score
+evaluators:
+  - evaluator: LogisticEvaluator
+    metrics:
+      - accuracy_score
+      - classification_report
+      - roc_auc_score

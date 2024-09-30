@@ -124,7 +124,9 @@ def compose_preprocessor(
     return preprocessors[-1]
 
 
-def do_preprocessing(preprocessor_configs: list[PreprocessorConfig]) -> bool:
+def do_preprocessing(
+    preprocessor_configs: list[PreprocessorConfig],
+) -> bool:
     """
     If both preprocessor and pipelines fields for the first PreprocessorConfig are None,
     then returns False.

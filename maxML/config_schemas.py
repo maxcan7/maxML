@@ -12,10 +12,17 @@ from maxML.utils import get_estimator_fn
 
 
 ModelType = TypeVar("ModelType", bound=BaseModel)
-PREPROCESSORS = ["ColumnTransformerPreprocessor", "FeatureUnionPreprocessor"]
 
+PREPROCESSORS = ["ColumnTransformerPreprocessor", "FeatureUnionPreprocessor"]
 PIPELINES_DICT_TYPE = list[dict[Any, Any]]
 PREPROCESSORS_LIST_TYPE = list[dict[str, str | PIPELINES_DICT_TYPE]]
+
+EVALUATORS = ["LogisticEvaluator", "LinearEvaluator"]
+
+
+class EvaluatorConfig(BaseModel):
+    evaluator: Optional[str] = None
+    metrics: Optional[list[str]] = None
 
 
 class PreprocessorConfig(BaseModel):
@@ -32,7 +39,7 @@ class PipelineConfig(BaseModel):
     input_path: str
     target: str
     preprocessors: list[PreprocessorConfig]
-    metrics: list[str]
+    evaluators: list[EvaluatorConfig]
 
     @field_validator("sklearn_model", mode="after")
     @staticmethod
@@ -43,6 +50,8 @@ class PipelineConfig(BaseModel):
         field validation after parsing.
         """
         return get_estimator_fn(sklearn_model)()
+
+    # TODO: Consolidate validate_preprocessor and validate_evaluator?
 
     @field_validator("preprocessors", mode="before")
     @staticmethod
@@ -59,6 +68,22 @@ class PipelineConfig(BaseModel):
                 raise KeyError(f"preprocessor must be in {PREPROCESSORS}.")
             preprocessor_configs.append(PreprocessorConfig(**preprocessor))
         return preprocessor_configs
+
+    @field_validator("evaluators", mode="before")
+    @staticmethod
+    def validate_evaluator(
+        evaluators: list[dict[str, str | list[str]]]
+    ) -> list[EvaluatorConfig]:
+        evaluator_configs = []
+        if not evaluators:
+            return [EvaluatorConfig()]
+        for evaluator in evaluators:
+            if "evaluator" not in evaluator.keys():
+                raise KeyError("evaluators dict must contain an evaluator key.")
+            if evaluator["evaluator"] not in EVALUATORS:
+                raise KeyError(f"evaluator must be in {EVALUATORS}.")
+            evaluator_configs.append(EvaluatorConfig(**evaluator))
+        return evaluator_configs
 
 
 def load_config(config_class: type[ModelType], model_config_path: str) -> ModelType:

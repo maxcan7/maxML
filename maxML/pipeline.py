@@ -1,20 +1,16 @@
 import sys
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
 from sklearn.base import BaseEstimator
 from sklearn.compose import ColumnTransformer
-from sklearn.metrics import accuracy_score
-from sklearn.metrics import classification_report
-from sklearn.metrics import mean_squared_error
-from sklearn.metrics import r2_score
-from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 
 from maxML.config_schemas import load_config
 from maxML.config_schemas import PipelineConfig
+from maxML.evaluators import do_evaluation
+from maxML.evaluators import evaluate
 from maxML.preprocessors import compose_preprocessor
 from maxML.preprocessors import do_preprocessing
 
@@ -22,39 +18,6 @@ from maxML.preprocessors import do_preprocessing
 """
 Runner script for an end-to-end sklearn model pipeline using maxML.
 """
-
-
-def evaluate_logistic(
-    y_test: pd.DataFrame,
-    X_test: pd.DataFrame,
-    pipeline: Pipeline,
-    predictions: np.ndarray,
-) -> dict:
-    """TODO: configure"""
-    accuracy = accuracy_score(y_test, predictions)
-    report = classification_report(y_test, predictions)
-    roc_auc = roc_auc_score(y_test, pipeline.predict_proba(X_test)[:, 1])
-    # TODO: Convert to pydantic or dataclass.
-    return {
-        "accuracy": accuracy,
-        "report": report,
-        "roc_auc": roc_auc,
-    }
-
-
-def evaluate_linear(
-    y_test: pd.DataFrame, X_test: pd.DataFrame, predictions: np.ndarray
-) -> dict:
-    """TODO: configure"""
-    mse = mean_squared_error(y_test, predictions)
-    rmse = np.sqrt(mse)
-    r2 = r2_score(y_test, predictions)
-    # TODO: Convert to pydantic or dataclass.
-    return {
-        "mse": mse,
-        "rmse": rmse,
-        "r2": r2,
-    }
 
 
 def get_y(df: pd.DataFrame, target: str) -> pd.DataFrame:
@@ -103,7 +66,13 @@ def run(pipeline_config_path: str) -> None:
     pipeline.fit(X_train, y_train)
     predictions = pipeline.predict(X_test)
 
-    # TODO: Abstract out evaluate logic.
+    if do_evaluation(pipeline_config.evaluators):
+        evaluations = evaluate(
+            pipeline_config.evaluators, y_test, X_test, predictions, pipeline
+        )
+        from pprint import pprint
+
+        pprint(evaluations)
     # linear_metrics = evaluate_linear(
     #     y_test=y_test, X_test=X_test, predictions=linear_predictions
     # )
@@ -112,17 +81,16 @@ def run(pipeline_config_path: str) -> None:
     # print(f"  RMSE: {linear_metrics['rmse']:.2f}")
     # print(f"  R-squared: {linear_metrics['r2']:.2f}")
 
-    # TODO: Abstract out evaluate logic.
-    logistic_metrics = evaluate_logistic(
-        y_test=y_test,
-        X_test=X_test,
-        pipeline=pipeline,
-        predictions=predictions,
-    )
-    print("\nLogistic Regression:")
-    print(f"  Accuracy: {logistic_metrics['accuracy']:.2f}")
-    print(f"  Classification Report:\n{logistic_metrics['report']}")
-    print(f"  ROC AUC: {logistic_metrics['roc_auc']:.2f}")
+    # logistic_metrics = evaluate_logistic(
+    #     y_test=y_test,
+    #     X_test=X_test,
+    #     pipeline=pipeline,
+    #     predictions=predictions,
+    # )
+    # print("\nLogistic Regression:")
+    # print(f"  Accuracy: {logistic_metrics['accuracy']:.2f}")
+    # print(f"  Classification Report:\n{logistic_metrics['report']}")
+    # print(f"  ROC AUC: {logistic_metrics['roc_auc']:.2f}")
 
 
 if __name__ == "__main__":

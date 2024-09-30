@@ -6,3 +6,4 @@ metrics:
   - classification_report
   - roc_auc_score
 preprocessors:
+evaluators:
