@@ -67,6 +67,7 @@ def run(pipeline_config_path: str) -> None:
 
     pipeline.fit(X_train, y_train)
     predictions = pipeline.predict(X_test)
+    print(predictions)
 
     if do_evaluation(pipeline_config.evaluators):
         evaluations = evaluate(
@@ -74,24 +75,7 @@ def run(pipeline_config_path: str) -> None:
         )
         print(evaluations)
 
-    # linear_metrics = evaluate_linear(
-    #     y_test=y_test, X_test=X_test, predictions=linear_predictions
-    # )
-    # print("Linear Regression:")
-    # print(f"  MSE: {linear_metrics['mse']:.2f}")
-    # print(f"  RMSE: {linear_metrics['rmse']:.2f}")
-    # print(f"  R-squared: {linear_metrics['r2']:.2f}")
-
-    # logistic_metrics = evaluate_logistic(
-    #     y_test=y_test,
-    #     X_test=X_test,
-    #     pipeline=pipeline,
-    #     predictions=predictions,
-    # )
-    # print("\nLogistic Regression:")
-    # print(f"  Accuracy: {logistic_metrics['accuracy']:.2f}")
-    # print(f"  Classification Report:\n{logistic_metrics['report']}")
-    # print(f"  ROC AUC: {logistic_metrics['roc_auc']:.2f}")
+    # TODO: Add write (either dump evaluations or integrate with e.g. MLFlow)
 
 
 if __name__ == "__main__":

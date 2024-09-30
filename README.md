@@ -1,8 +1,5 @@
 # maxML Machine Learning Framework
-In its current state this is simply an sklearn demo_pipeline. Over time it will evolve into a robust ML Framework that can take yaml files and configure them into scikit-learn Pipelines, automatic the code through features such as a factory and plugin design and hierarchical YAML processing.
-
-## Overview: demo_pipeline.py
-This project explores the use of linear and logistic regression models to predict whether a customer will make a purchase based on various features.
+The maxML module allows Data Scientists to horizontally implement scikit-learn Pipelines through YAML configurations. The configs are parsed and validated, and the Pipelines are composed from Protocols, such that only the core code implementation requires testing, and everything else can be parameterized via YAML.
 
 
 ## Dataset
@@ -21,7 +18,7 @@ The dataset includes missing values and potential outliers, simulating real-worl
 
 ## Pipeline
 
-The project utilizes scikit-learn pipelines to streamline the preprocessing and modeling steps. The pipeline includes:
+The project utilizes scikit-learn Pipelines to streamline the preprocessing and modeling steps. The pipeline includes:
 
 * Imputation of missing values
 * Encoding of categorical features
@@ -36,7 +33,7 @@ The project utilizes scikit-learn pipelines to streamline the preprocessing and 
    * `pip install -e .[dev]` if you want full dev features.
 
 2. **Run the code:**
-   * Execute the demo_pipeline after installing: `python ./pipelines/demo_pipeline.py`. It will:
+   * Execute the demo_pipeline after installing: `python ./maxML/pipeline.py <path_to_yaml_config>`. It will:
      * Preprocess the data
      * Split the data into training and testing sets
      * Train the linear and logistic regression models
@@ -51,9 +48,8 @@ The project utilizes scikit-learn pipelines to streamline the preprocessing and 
 
 ## Next Steps
 Demo Pipeline:
-* Add configurable data handling e.g. config.yml for data paths, params, etc.
-* Add pipeline abstraction e.g. a maxMLModel abc or protocol framework.
-* Update demo_pipeline to leverage this flexibility.
+* Add write function or integrations
+* Update printing
 
 Data Engineering and Modeling:
 * Explore the data further to gain insights into the relationships between features and the target variable.
@@ -61,17 +57,18 @@ Data Engineering and Modeling:
 * Experiment with hyperparameter tuning to optimize model performance.
 * Try other machine learning algorithms that might be better suited for this problem.
 
-Model Framework:
-* Add factory and plugin pattern.
-* Add hierarchical YAML management.
+maxML Framework:
+* Refactor classes and protocols (reduce code where feasible, currently feels anti-patterned)
+* Add more Preprocessors, Evaluators, Models, etc.
+* Add Model parameterization.
 
 Software Engineering:
-* Add unit tests on these new features.
-* Add CICD and define release strategy.
+* Add Evaluator unit tests.
+* Add release strategy.
 * Add model artifact support e.g. MLFlow.
 * Add containerization.
 
 
 ## Important Notes
 * This is currently a proof of concept, although I hope to develop it into something more broadly usable.
-* The demo_pipeline in its most basic form, as well as the gemini_sample_data, were generated using Gemini.
+* The gemini_sample_data was generated using Gemini.
