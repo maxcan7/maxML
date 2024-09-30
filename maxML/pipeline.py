@@ -62,18 +62,18 @@ def run(pipeline_config_path: str) -> None:
     X = get_X(df=df, target=pipeline_config.target)
     y = get_y(df=df, target=pipeline_config.target)
     X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=42  # TODO: Configure
+        X, y, **pipeline_config.train_test_split
     )
 
     pipeline.fit(X_train, y_train)
     predictions = pipeline.predict(X_test)
-    print(predictions)
+    print(f"{predictions=}")
 
     if do_evaluation(pipeline_config.evaluators):
         evaluations = evaluate(
             pipeline_config.evaluators, y_test, X_test, predictions, pipeline
         )
-        print(evaluations)
+        print(f"{evaluations=}")
 
     # TODO: Add write (either dump evaluations or integrate with e.g. MLFlow)
 

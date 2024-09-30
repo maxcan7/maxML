@@ -39,6 +39,7 @@ class PipelineConfig(BaseModel):
     input_path: str
     target: str
     preprocessors: list[PreprocessorConfig]
+    train_test_split: dict[str, Any]  # TODO: Turn into Pydantic Schema.
     evaluators: list[EvaluatorConfig]
 
     @field_validator("sklearn_model", mode="after")
