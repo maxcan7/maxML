@@ -93,13 +93,13 @@ def _compose(
 
 def get_preprocessor_fn(preprocessor_config: PreprocessorConfig) -> Preprocessor:
     """
-    Return Preprocessor module as defined in preprocessor field in config.
+    Return Preprocessor module as defined in type field in config.
     """
-    if not preprocessor_config.preprocessor:
-        raise KeyError("preprocessor_config is missing preprocessor field.")
+    if not preprocessor_config.type:
+        raise KeyError("preprocessor_config is missing type field.")
     if not preprocessor_config.pipelines:
         raise KeyError("preprocessor_config is missing pipelines field.")
-    preprocessor_type = preprocessor_config.preprocessor
+    preprocessor_type = preprocessor_config.type
     return PREPROCESSORS[preprocessor_type]  # type: ignore
 
 
@@ -128,11 +128,9 @@ def do_preprocessing(
     preprocessor_configs: list[PreprocessorConfig],
 ) -> bool:
     """
-    If both preprocessor and pipelines fields for the first PreprocessorConfig are None,
+    If both type and pipelines fields for the first PreprocessorConfig are None,
     then returns False.
     This is used to determine whether or not to do preprocessing.
     If only one is empty, it will raise a KeyError on get_preprocessor.
     """
-    return any(
-        [preprocessor_configs[0].preprocessor, preprocessor_configs[0].pipelines]
-    )
+    return any([preprocessor_configs[0].type, preprocessor_configs[0].pipelines])

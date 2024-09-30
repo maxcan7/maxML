@@ -4,7 +4,7 @@ target: Purchased
 
 preprocessors:
 
-  - preprocessor: FeatureUnionPreprocessor
+  - type: FeatureUnionPreprocessor
 
     pipelines:
 
@@ -26,7 +26,7 @@ train_test_split:
   random_state: 42
 
 evaluators:
-  - evaluator: LogisticEvaluator
+  - type: LogisticEvaluator
     metrics:
       - accuracy_score
       - classification_report

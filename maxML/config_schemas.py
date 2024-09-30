@@ -6,6 +6,7 @@ from typing import TypeVar
 import yaml
 from pydantic import BaseModel
 from pydantic import field_validator
+from pydantic.fields import FieldInfo
 from sklearn.base import BaseEstimator
 
 from maxML.utils import get_estimator_fn
@@ -21,12 +22,12 @@ EVALUATORS = ["LogisticEvaluator", "LinearEvaluator"]
 
 
 class EvaluatorConfig(BaseModel):
-    evaluator: Optional[str] = None
+    type: Optional[str] = None
     metrics: Optional[list[str]] = None
 
 
 class PreprocessorConfig(BaseModel):
-    preprocessor: Optional[str] = None
+    type: Optional[str] = None
     pipelines: Optional[PIPELINES_DICT_TYPE] = None
 
 
@@ -52,39 +53,42 @@ class PipelineConfig(BaseModel):
         """
         return get_estimator_fn(sklearn_model)()
 
-    # TODO: Consolidate validate_preprocessor and validate_evaluator?
-
-    @field_validator("preprocessors", mode="before")
+    @field_validator("preprocessors", "evaluators", mode="before")
     @staticmethod
-    def validate_preprocessor(
-        preprocessors: PREPROCESSORS_LIST_TYPE,
-    ) -> list[PreprocessorConfig]:
-        preprocessor_configs = []
-        if not preprocessors:
-            return [PreprocessorConfig()]
-        for preprocessor in preprocessors:
-            if "preprocessor" not in preprocessor.keys():
-                raise KeyError("preprocessors dict must contain a preprocessor key.")
-            if preprocessor["preprocessor"] not in PREPROCESSORS:
-                raise KeyError(f"preprocessor must be in {PREPROCESSORS}.")
-            preprocessor_configs.append(PreprocessorConfig(**preprocessor))
-        return preprocessor_configs
+    def validate_config_list(
+        config_list: list[dict[str, Any]], field: FieldInfo
+    ) -> list[BaseModel]:
+        """
+        Generic validator for lists of configuration dictionaries
+        (preprocessors or evaluators).
+        """
+        valid_options = (
+            PREPROCESSORS
+            if field.field_name == "preprocessors"  # type: ignore
+            else EVALUATORS
+        )
+        config_class = (
+            PreprocessorConfig
+            if field.field_name == "preprocessors"  # type: ignore
+            else EvaluatorConfig
+        )
 
-    @field_validator("evaluators", mode="before")
-    @staticmethod
-    def validate_evaluator(
-        evaluators: list[dict[str, str | list[str]]]
-    ) -> list[EvaluatorConfig]:
-        evaluator_configs = []
-        if not evaluators:
-            return [EvaluatorConfig()]
-        for evaluator in evaluators:
-            if "evaluator" not in evaluator.keys():
-                raise KeyError("evaluators dict must contain an evaluator key.")
-            if evaluator["evaluator"] not in EVALUATORS:
-                raise KeyError(f"evaluator must be in {EVALUATORS}.")
-            evaluator_configs.append(EvaluatorConfig(**evaluator))
-        return evaluator_configs
+        validated_configs = []
+        if not config_list:
+            return [config_class()]
+
+        for config in config_list:
+            if "type" not in config:
+                raise KeyError(
+                    f"{field.field_name} dict must contain a type key."  # type: ignore
+                )
+            if config["type"] not in valid_options:
+                raise KeyError(
+                    f"Invalid type: {field.field_name}"  # type: ignore
+                    f"Must be one of {valid_options}"
+                )
+            validated_configs.append(config_class(**config))
+        return validated_configs
 
 
 def load_config(config_class: type[ModelType], model_config_path: str) -> ModelType:

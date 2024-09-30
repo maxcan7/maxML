@@ -74,11 +74,11 @@ EVALUATORS = {
 
 def get_evaluator_fn(evaluator_config: EvaluatorConfig) -> Evaluator:
     """
-    Return Evaluator module as defined in evaluator field in config.
+    Return Evaluator module as defined in type field in config.
     """
-    if not evaluator_config.evaluator:
-        raise KeyError("evaluator_config is missing evaluator field.")
-    evaluator_type = evaluator_config.evaluator
+    if not evaluator_config.type:
+        raise KeyError("evaluator_config is missing type field.")
+    evaluator_type = evaluator_config.type
     return EVALUATORS[evaluator_type]  # type: ignore
 
 
@@ -101,4 +101,4 @@ def do_evaluation(evaluator_configs: list[EvaluatorConfig]) -> bool:
     """
     This is used to determine whether or not to do evaluation.
     """
-    return any([evaluator_configs[0].evaluator])
+    return any([evaluator_configs[0].type])
