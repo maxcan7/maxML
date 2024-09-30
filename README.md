@@ -33,12 +33,19 @@ The project utilizes scikit-learn Pipelines to streamline the preprocessing and 
    * `pip install -e .[dev]` if you want full dev features.
 
 2. **Run the code:**
-   * Execute the demo_pipeline after installing: `python ./maxML/pipeline.py <path_to_yaml_config>`. It will:
+   * Execute the pipeline after installing: `python ./maxML/pipeline.py <path_to_yaml_config>`. It will:
      * Preprocess the data
      * Split the data into training and testing sets
      * Train the linear and logistic regression models
      * Evaluate the models on the test set
      * Print the evaluation metrics
+   * Alternatively, the maxML module can be used within a script or notebook:
+     ```
+     import maxML
+
+
+     maxML.pipeline.run("/path/to/config.yaml")
+     ```
 
 
 ## Evaluation Metrics
@@ -47,20 +54,14 @@ The project utilizes scikit-learn Pipelines to streamline the preprocessing and 
 
 
 ## Next Steps
-Demo Pipeline:
-* Add write function or integrations
-* Update printing
-
-Data Engineering and Modeling:
-* Explore the data further to gain insights into the relationships between features and the target variable.
-* Consider feature engineering to create new features or transform existing ones.
-* Experiment with hyperparameter tuning to optimize model performance.
-* Try other machine learning algorithms that might be better suited for this problem.
-
 maxML Framework:
 * Refactor classes and protocols (reduce code where feasible, currently feels anti-patterned)
 * Add more Preprocessors, Evaluators, Models, etc.
 * Add Model parameterization.
+
+Pipeline:
+* Add write function or integrations
+* Update printing
 
 Software Engineering:
 * Add Evaluator unit tests.
@@ -68,6 +69,12 @@ Software Engineering:
 * Add model artifact support e.g. MLFlow.
 * Add containerization.
 * Update versioning to use git tags.
+
+Data Engineering and Modeling:
+* Explore the data further to gain insights into the relationships between features and the target variable.
+* Consider feature engineering to create new features or transform existing ones.
+* Experiment with hyperparameter tuning to optimize model performance.
+* Try other machine learning algorithms that might be better suited for this problem.
 
 
 ## Important Notes
