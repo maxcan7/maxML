@@ -31,9 +31,11 @@ def get_X(df: pd.DataFrame, target: str) -> pd.DataFrame:
 
 
 def create_model_pipeline(
-    model: BaseEstimator, preprocessor: ColumnTransformer
+    model: BaseEstimator, preprocessor: ColumnTransformer = None
 ) -> Pipeline:
     """TODO: Configure"""
+    if not preprocessor:
+        return Pipeline([("model", model)])
     return Pipeline([("preprocessor", preprocessor), ("model", model)])
 
 
@@ -49,10 +51,10 @@ def run(pipeline_config_path: str) -> None:
     pipeline_config = load_config(PipelineConfig, pipeline_config_path)
     df = load_data(pipeline_config.input_path)
 
+    preprocessor = None
     if do_preprocessing(pipeline_config.preprocessors):
         preprocessor = compose_preprocessor(pipeline_config.preprocessors)
 
-    # TODO: Add handling for when preprocessor is None.
     pipeline = create_model_pipeline(
         model=pipeline_config.sklearn_model, preprocessor=preprocessor
     )
@@ -70,9 +72,8 @@ def run(pipeline_config_path: str) -> None:
         evaluations = evaluate(
             pipeline_config.evaluators, y_test, X_test, predictions, pipeline
         )
-        from pprint import pprint
+        print(evaluations)
 
-        pprint(evaluations)
     # linear_metrics = evaluate_linear(
     #     y_test=y_test, X_test=X_test, predictions=linear_predictions
     # )
