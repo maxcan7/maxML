@@ -68,6 +68,8 @@ Software Engineering:
 * Add model artifact support e.g. MLFlow.
 * Add containerization.
 * Update versioning to use git tags.
+* Add CD.
+* Add multi-OS testing and support.
 
 Data Engineering and Modeling:
 * Explore the data further to gain insights into the relationships between features and the target variable.
