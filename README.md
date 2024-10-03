@@ -64,7 +64,6 @@ Pipeline:
 * Update printing
 
 Software Engineering:
-* Add Evaluator unit tests.
 * Add release strategy.
 * Add model artifact support e.g. MLFlow.
 * Add containerization.
