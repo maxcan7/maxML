@@ -7,7 +7,7 @@ name = "maxML"
 dynamic = ["version"]
 description = "An ML framework built on top of scikit-learn Pipelines"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.9"
 
 authors = [
   {name = "Max Cantor", email = "maxcan7@gmail.com" }
@@ -18,6 +18,9 @@ maintainers = [
 
 classifiers = [
   "Development Status :: 3 - Alpha",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3 :: Only",
 ]
