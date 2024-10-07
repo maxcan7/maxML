@@ -23,7 +23,7 @@ The project utilizes scikit-learn Pipelines to streamline the preprocessing and 
 * Imputation of missing values
 * Encoding of categorical features
 * Scaling of numerical features
-* Linear Regression and Logistic Regression model
+* Linear Regression or Logistic Regression model
 
 
 ## Usage
@@ -36,7 +36,7 @@ The project utilizes scikit-learn Pipelines to streamline the preprocessing and 
    * Execute the pipeline after installing: `python ./maxML/pipeline.py <path_to_yaml_config>`. It will:
      * Preprocess the data
      * Split the data into training and testing sets
-     * Train the linear and logistic regression models
+     * Train the linear or logistic regression models
      * Evaluate the models on the test set
      * Print the evaluation metrics
    * Alternatively, the maxML module can be used within a script or notebook:
@@ -46,6 +46,90 @@ The project utilizes scikit-learn Pipelines to streamline the preprocessing and 
 
      maxML.pipeline.run("/path/to/config.yaml")
      ```
+
+
+## Example Config
+
+Several test configs exist in the `tests/test_configs/` subdirectory.
+
+Using the `columntransformer_logistic.yaml` config as an example:
+```
+sklearn_model: sklearn.linear_model.LogisticRegression
+input_path: data/gemini_sample_data.csv
+target: Purchased
+
+preprocessors:
+
+  - type: ColumnTransformerPreprocessor
+
+    pipelines:
+
+    - name: numeric
+      steps:
+      - name: imputer
+        sklearn_module: sklearn.impute.SimpleImputer
+        args:
+          strategy: median
+      - name: scaler
+        sklearn_module: sklearn.preprocessing.StandardScaler
+      columns:
+        - Age
+        - Income
+        - Years_of_Experience
+
+    - name : nominal
+      steps:
+      - name: imputer
+        sklearn_module: sklearn.impute.SimpleImputer
+        args:
+          strategy: most_frequent
+      - name: onehot
+        sklearn_module: sklearn.preprocessing.OneHotEncoder
+        args:
+          handle_unknown: ignore
+      columns:
+        - Gender
+        - City
+
+    - name : ordinal
+      steps:
+      - name: imputer
+        sklearn_module: sklearn.impute.SimpleImputer
+        args:
+          strategy: most_frequent
+      - name: ordinal
+        sklearn_module: sklearn.preprocessing.OrdinalEncoder
+        args:
+          categories:
+            -
+              - High School
+              - Bachelor's
+              - Master's
+              - PhD
+          handle_unknown: use_encoded_value
+          unknown_value: !!python/name:numpy.nan
+      columns:
+        - Education
+
+train_test_split:
+  test_size: 0.2
+  random_state: 42
+
+evaluators:
+  - type: LogisticEvaluator
+    metrics:
+      - accuracy_score
+      - classification_report
+      - roc_auc_score
+```
+
+This config uses sklearn's Logistic Regression module as its model, the gemini sample dataset from the `data` subdirectory, and the column `Purchased` as the target.
+
+The preprocessor is a ColumnTransformerPreprocessor consisting of three Pipelines, a numeric, categorical, and ordinal preprocessor, each consisting of two steps such as some kind of imputation, encoding, or scaling. Each Pipeline operates over the columns assigned by the columns key, and additional arguments can be passed through the args key. These fields correspond to the interfaces of the corresponding python modules.
+
+train_test_split here sets a test_size and a random_state (since it's used for testing), but any other args for the train_test_split sklearn module can also be added as fields in this config.
+
+The evaluator is for evaluation metrics associated with logistic regression.
 
 
 ## Evaluation Metrics
