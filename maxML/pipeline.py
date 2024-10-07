@@ -2,18 +2,19 @@ import sys
 from pathlib import Path
 
 import pandas as pd
-from sklearn.base import BaseEstimator
 from sklearn.compose import ColumnTransformer
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import FeatureUnion
 from sklearn.pipeline import Pipeline
 
 from maxML.config_schemas import load_config
+from maxML.config_schemas import ModelConfig
 from maxML.config_schemas import PipelineConfig
 from maxML.evaluators import do_evaluation
 from maxML.evaluators import evaluate
 from maxML.preprocessors import compose_preprocessor
 from maxML.preprocessors import do_preprocessing
+from maxML.utils import get_estimator_fn
 
 
 """
@@ -32,12 +33,20 @@ def get_X(df: pd.DataFrame, target: str) -> pd.DataFrame:
 
 
 def create_model_pipeline(
-    model: BaseEstimator, preprocessor: ColumnTransformer | FeatureUnion = None
+    model_config: ModelConfig, preprocessor: ColumnTransformer | FeatureUnion = None
 ) -> Pipeline:
-    """TODO: Configure"""
-    if not preprocessor:
-        return Pipeline([("model", model)])
-    return Pipeline([("preprocessor", preprocessor), ("model", model)])
+    """
+    Creates a scikit-learn Pipeline for a machine learning model.
+    The pipeline optionally includes a preprocessing step and always includes
+    a model step.
+    """
+    model_args = model_config.args or {}
+    model_module = get_estimator_fn(model_config.module)
+    model = model_module(**model_args)
+    steps = [("model", model)]
+    if preprocessor:
+        steps.insert(0, ("preprocessor", preprocessor))
+    return Pipeline(steps)
 
 
 def load_data(input_path: str) -> pd.DataFrame:
@@ -49,7 +58,7 @@ def run(pipeline_config_path: str) -> None:
     """
     Run sklearn pipelines on dataset with preprocessors steps.
     """
-    pipeline_config = load_config(PipelineConfig, pipeline_config_path)
+    pipeline_config: PipelineConfig = load_config(pipeline_config_path)
     df = load_data(pipeline_config.input_path)
 
     preprocessor = None
@@ -57,11 +66,11 @@ def run(pipeline_config_path: str) -> None:
         preprocessor = compose_preprocessor(pipeline_config.preprocessors)
 
     pipeline = create_model_pipeline(
-        model=pipeline_config.sklearn_model, preprocessor=preprocessor
+        model_config=pipeline_config.model, preprocessor=preprocessor
     )
 
-    X = get_X(df=df, target=pipeline_config.target)
-    y = get_y(df=df, target=pipeline_config.target)
+    X = get_X(df=df, target=pipeline_config.model.target)
+    y = get_y(df=df, target=pipeline_config.model.target)
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, **pipeline_config.train_test_split
     )
