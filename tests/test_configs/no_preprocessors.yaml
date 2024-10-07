@@ -1,12 +1,14 @@
-sklearn_model: sklearn.linear_model.LogisticRegression
 input_path: data/gemini_sample_data.csv
-target: Purchased
-metrics:
-  - accuracy_score
-  - classification_report
-  - roc_auc_score
 preprocessors:
 train_test_split:
   test_size: 0.2
   random_state: 42
+model:
+  module: sklearn.linear_model.LogisticRegression
+  target: Purchased
 evaluators:
+  - type: LogisticEvaluator
+    metrics:
+      - accuracy_score
+      - classification_report
+      - roc_auc_score

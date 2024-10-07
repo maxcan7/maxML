@@ -53,23 +53,6 @@ preprocessors:
       columns:
         - Education
 
-  - type: FeatureUnionPreprocessor
-
-    pipelines:
-
-    - name: numeric_featureunion
-      steps:
-      - name: robust_scaler
-        sklearn_module: sklearn.preprocessing.RobustScaler
-      - name: poly
-        sklearn_module: sklearn.preprocessing.PolynomialFeatures
-        args:
-          include_bias: False
-      columns:
-        - Age
-        - Income
-        - Years_of_Experience
-
 train_test_split:
   test_size: 0.2
   random_state: 42
@@ -79,8 +62,3 @@ model:
   target: Purchased
 
 evaluators:
-  - type: LogisticEvaluator
-    metrics:
-      - accuracy_score
-      - classification_report
-      - roc_auc_score

@@ -1,6 +1,4 @@
-sklearn_model: sklearn.linear_model.LogisticRegression
 input_path: data/gemini_sample_data.csv
-target: Purchased
 
 preprocessors:
 
@@ -58,6 +56,10 @@ preprocessors:
 train_test_split:
   test_size: 0.2
   random_state: 42
+
+model:
+  module: sklearn.linear_model.LogisticRegression
+  target: Purchased
 
 evaluators:
   - type: LogisticEvaluator
