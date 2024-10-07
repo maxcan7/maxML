@@ -1,4 +1,4 @@
-input_path: data/gemini_sample_data.csv
+input_path: tests/test_data/gemini_sample_data.csv
 
 preprocessors:
 

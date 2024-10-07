@@ -20,7 +20,7 @@ from maxML.config_schemas import PreprocessorConfig
 def test_valid_config(config_path: str):
     """Test that a valid configuration loads correctly."""
     config: PipelineConfig = load_config(config_path)
-    assert config.input_path == "data/gemini_sample_data.csv"
+    assert config.input_path == "tests/test_data/gemini_sample_data.csv"
     assert isinstance(config.preprocessors[0], PreprocessorConfig)
     assert isinstance(config.model, ModelConfig)
     assert isinstance(config.evaluators[0], EvaluatorConfig)

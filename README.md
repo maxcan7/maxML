@@ -3,7 +3,7 @@ The maxML module allows Data Scientists to horizontally implement scikit-learn P
 
 
 ## Dataset
-The dataset (`/data/gemini_sample_data.csv`) was generated using Gemini and contains 1000 rows with the following columns:
+The dataset (`/tests/test_data/gemini_sample_data.csv`) was generated using Gemini and contains 1000 rows with the following columns:
 
 * `Age` (numerical)
 * `Gender` (categorical)
@@ -54,7 +54,7 @@ Several test configs exist in the `tests/test_configs/` subdirectory.
 
 Using the `columntransformer_logistic.yaml` config as an example:
 ```
-input_path: data/gemini_sample_data.csv
+input_path: tests/test_data/gemini_sample_data.csv
 
 preprocessors:
 
