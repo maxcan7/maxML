@@ -23,9 +23,5 @@ def test_valid_config(config_path: str):
     assert config.input_path == "tests/test_data/gemini_sample_data.csv"
     assert isinstance(config.preprocessors[0], PreprocessorConfig)
     assert isinstance(config.model, ModelConfig)
+    assert config.model.args["random_state"] == 42  # type: ignore
     assert isinstance(config.evaluators[0], EvaluatorConfig)
-
-
-# TODO:
-# - Add more cases.
-# - Test specific configs i.e. PreprocessorConfig, ModelConfig, EvaluatorConfig.abs

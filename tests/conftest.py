@@ -1,4 +1,6 @@
 import numpy as np
+import pandas as pd
+import pytest
 from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
 from sklearn.pipeline import FeatureUnion
@@ -9,8 +11,14 @@ from sklearn.preprocessing import PolynomialFeatures
 from sklearn.preprocessing import RobustScaler
 from sklearn.preprocessing import StandardScaler
 
+from maxML.config_schemas import load_config
+from maxML.config_schemas import PipelineConfig
+from maxML.pipeline import load_data
+from maxML.preprocessors import compose_preprocessor
+from maxML.preprocessors import Preprocessor
 
-def columntransformer_preprocessor_fixture() -> ColumnTransformer:
+
+def columntransformer_fixture() -> ColumnTransformer:
     """Hard-coded ColumnTransformer fixture."""
     numeric_pipeline = Pipeline(
         [
@@ -48,13 +56,13 @@ def columntransformer_preprocessor_fixture() -> ColumnTransformer:
     return ColumnTransformer(transformers=[numeric, nominal, ordinal])
 
 
-def featureunion_preprocessor_fixture() -> FeatureUnion:
+def featureunion_fixture() -> FeatureUnion:
     """
     Hard-coded FeatureUnion fixture which takes a ColumnTransformer as one of its
     transformers in order to test both FeatureUnion and the ability of maxML
     preprocessors to handle two Preprocessors.
     """
-    columntransformer = ("columntransformer", columntransformer_preprocessor_fixture())
+    columntransformer = ("columntransformer", columntransformer_fixture())
     numeric_featureunion_pipeline = Pipeline(
         [
             ("robust_scaler", RobustScaler()),
@@ -68,3 +76,18 @@ def featureunion_preprocessor_fixture() -> FeatureUnion:
         numeric_featureunion_columns,
     )
     return FeatureUnion(transformer_list=[columntransformer, numeric_featureunion])
+
+
+@pytest.fixture
+def test_preprocessor(test_config: PipelineConfig) -> Preprocessor:
+    return compose_preprocessor(test_config.preprocessors)
+
+
+@pytest.fixture
+def test_data(test_config: PipelineConfig) -> pd.DataFrame:
+    return load_data(test_config.input_path)
+
+
+@pytest.fixture
+def test_config() -> PipelineConfig:
+    return load_config("tests/test_configs/columntransformer_logistic.yaml")

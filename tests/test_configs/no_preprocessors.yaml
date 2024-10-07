@@ -6,6 +6,8 @@ train_test_split:
 model:
   module: sklearn.linear_model.LogisticRegression
   target: Purchased
+  args:
+    random_state: 42
 evaluators:
   - type: LogisticEvaluator
     metrics:
