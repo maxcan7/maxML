@@ -1,15 +1,12 @@
 from pathlib import Path
 from typing import Any
+from typing import cast
 from typing import Optional
 from typing import TypeVar
 
 import yaml
 from pydantic import BaseModel
-from pydantic import field_validator
 from pydantic import root_validator
-from sklearn.base import BaseEstimator
-
-from maxML.utils import get_estimator_fn
 
 
 ModelType = TypeVar("ModelType", bound=BaseModel)
@@ -24,6 +21,12 @@ EVALUATORS = ["LogisticEvaluator", "LinearEvaluator"]
 class EvaluatorConfig(BaseModel):
     type: Optional[str] = None
     metrics: Optional[list[str]] = None
+
+
+class ModelConfig(BaseModel):
+    module: str
+    target: str
+    args: Optional[dict[str, Any]] = None
 
 
 class PreprocessorConfig(BaseModel):
@@ -48,22 +51,11 @@ class PipelineConfig(BaseModel):
     Pydantic schema for parsing and validating a maxML pipeline config.
     """
 
-    sklearn_model: str
     input_path: str
-    target: str
     preprocessors: list[PreprocessorConfig]
     train_test_split: dict[str, Any]  # TODO: Turn into Pydantic Schema.
+    model: ModelConfig
     evaluators: list[EvaluatorConfig]
-
-    @field_validator("sklearn_model", mode="after")
-    @staticmethod
-    def retrieve_model_type(sklearn_model: str) -> BaseEstimator:
-        """
-        Given that BaseEstimator is not supported by pydantic-core, convert
-        the sklearn_model str to an sklearn model Estimator through pydantic
-        field validation after parsing.
-        """
-        return get_estimator_fn(sklearn_model)()
 
     @root_validator(pre=True)
     def validate_config_lists(cls, values: dict[str, Any]) -> dict[str, Any]:
@@ -111,8 +103,8 @@ class PipelineConfig(BaseModel):
 
 
 def load_config(
-    config_class: type[ModelType],
     model_config_path: str,
+    config_class: Optional[type[ModelType]] = None,
 ) -> ModelType:
     """
     Load yaml config, parse and validate with config_class schema.
@@ -120,6 +112,7 @@ def load_config(
     # NOTE: Using FullLoader to automatically parse python object pyyaml tags
     # e.g. !!python/name:numpy.nan
     # TODO: Replace the use of FullLoader with a custom serialization layer.
+    config_class = config_class or cast(type[ModelType], PipelineConfig)
     return config_class(
         **yaml.load(
             open(Path.cwd() / model_config_path),
