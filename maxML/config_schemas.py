@@ -6,7 +6,7 @@ from typing import TypeVar
 import yaml
 from pydantic import BaseModel
 from pydantic import field_validator
-from pydantic.fields import FieldInfo
+from pydantic import root_validator
 from sklearn.base import BaseEstimator
 
 from maxML.utils import get_estimator_fn
@@ -31,6 +31,18 @@ class PreprocessorConfig(BaseModel):
     pipelines: Optional[PIPELINES_DICT_TYPE] = None
 
 
+CONFIG_TYPES: dict[str, dict[str, Any]] = {
+    "preprocessors": {
+        "valid_options": PREPROCESSORS,
+        "config_class": PreprocessorConfig,
+    },
+    "evaluators": {
+        "valid_options": EVALUATORS,
+        "config_class": EvaluatorConfig,
+    },
+}
+
+
 class PipelineConfig(BaseModel):
     """
     Pydantic schema for parsing and validating a maxML pipeline config.
@@ -53,25 +65,34 @@ class PipelineConfig(BaseModel):
         """
         return get_estimator_fn(sklearn_model)()
 
-    @field_validator("preprocessors", "evaluators", mode="before")
+    @root_validator(pre=True)
+    def validate_config_lists(cls, values: dict[str, Any]) -> dict[str, Any]:
+        """
+        Validate lists of configuration dictionaries (e.g., preprocessors,
+        evaluators) by checking if they have a valid "type" key and
+        correspond to a known configuration class.
+        """
+        for field_name, config_list in values.items():
+            if field_name in CONFIG_TYPES:
+                values[field_name] = cls._validate_config_list(
+                    config_list,
+                    field_name,
+                )
+        return values
+
     @staticmethod
-    def validate_config_list(
-        config_list: list[dict[str, Any]], field: FieldInfo
+    def _validate_config_list(
+        config_list: list[dict[str, Any]], field_name: str
     ) -> list[BaseModel]:
         """
-        Generic validator for lists of configuration dictionaries
-        (preprocessors or evaluators).
+        Generic validator for lists of configuration dictionaries.
         """
-        valid_options = (
-            PREPROCESSORS
-            if field.field_name == "preprocessors"  # type: ignore
-            else EVALUATORS
-        )
-        config_class = (
-            PreprocessorConfig
-            if field.field_name == "preprocessors"  # type: ignore
-            else EvaluatorConfig
-        )
+        config_type = CONFIG_TYPES.get(field_name)
+        if not config_type:
+            raise ValueError(f"Unknown config type: {field_name}")
+
+        valid_options = config_type["valid_options"]
+        config_class = config_type["config_class"]
 
         validated_configs = []
         if not config_list:
@@ -79,25 +100,29 @@ class PipelineConfig(BaseModel):
 
         for config in config_list:
             if "type" not in config:
-                raise KeyError(
-                    f"{field.field_name} dict must contain a type key."  # type: ignore
-                )
+                raise KeyError(f"{field_name} dict must contain a type key.")
             if config["type"] not in valid_options:
                 raise KeyError(
-                    f"Invalid type: {field.field_name}"  # type: ignore
-                    f"Must be one of {valid_options}"
+                    f"Invalid type: {field_name} ",
+                    f"Must be one of {valid_options}",
                 )
             validated_configs.append(config_class(**config))
         return validated_configs
 
 
-def load_config(config_class: type[ModelType], model_config_path: str) -> ModelType:
+def load_config(
+    config_class: type[ModelType],
+    model_config_path: str,
+) -> ModelType:
     """
     Load yaml config, parse and validate with config_class schema.
     """
-    # NOTE: Using FullLoader to automatically parse python object pyyaml tags e.g.
-    # !!python/name:numpy.nan
+    # NOTE: Using FullLoader to automatically parse python object pyyaml tags
+    # e.g. !!python/name:numpy.nan
     # TODO: Replace the use of FullLoader with a custom serialization layer.
     return config_class(
-        **yaml.load(open(Path.cwd() / model_config_path), Loader=yaml.FullLoader)
+        **yaml.load(
+            open(Path.cwd() / model_config_path),
+            Loader=yaml.FullLoader,
+        )
     )
