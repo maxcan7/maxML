@@ -54,9 +54,7 @@ Several test configs exist in the `tests/test_configs/` subdirectory.
 
 Using the `columntransformer_logistic.yaml` config as an example:
 ```
-sklearn_model: sklearn.linear_model.LogisticRegression
 input_path: data/gemini_sample_data.csv
-target: Purchased
 
 preprocessors:
 
@@ -115,6 +113,10 @@ train_test_split:
   test_size: 0.2
   random_state: 42
 
+model:
+  module: sklearn.linear_model.LogisticRegression
+  target: Purchased
+
 evaluators:
   - type: LogisticEvaluator
     metrics:
@@ -141,7 +143,6 @@ The evaluator is for evaluation metrics associated with logistic regression.
 maxML Framework:
 * Refactor classes and protocols (reduce code where feasible, currently feels anti-patterned)
 * Add more Preprocessors, Evaluators, Models, etc.
-* Add Model parameterization.
 
 Pipeline:
 * Add write function or integrations
