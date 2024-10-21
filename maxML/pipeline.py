@@ -1,6 +1,5 @@
 import sys
 from pathlib import Path
-from typing import Any
 
 import pandas as pd
 from sklearn.compose import ColumnTransformer
