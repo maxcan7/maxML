@@ -1,5 +1,6 @@
 import sys
 from pathlib import Path
+from typing import Any
 
 import pandas as pd
 from sklearn.compose import ColumnTransformer
@@ -22,7 +23,7 @@ Runner script for an end-to-end sklearn model pipeline using maxML.
 """
 
 
-def get_y(df: pd.DataFrame, target: str) -> pd.DataFrame:
+def get_y(df: pd.DataFrame, target: str) -> pd.Series[Any]:
     """Subset dataframe to just target column."""
     return df[target]
 
