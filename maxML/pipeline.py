@@ -23,7 +23,7 @@ Runner script for an end-to-end sklearn model pipeline using maxML.
 """
 
 
-def get_y(df: pd.DataFrame, target: str) -> pd.Series[Any]:
+def get_y(df: pd.DataFrame, target: str) -> pd.Series:
     """Subset dataframe to just target column."""
     return df[target]
 
