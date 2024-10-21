@@ -6,7 +6,7 @@ from typing import TypeVar
 
 import yaml
 from pydantic import BaseModel
-from pydantic import root_validator
+from pydantic import model_validator
 
 
 ModelType = TypeVar("ModelType", bound=BaseModel)
@@ -57,7 +57,7 @@ class PipelineConfig(BaseModel):
     model: ModelConfig
     evaluators: list[EvaluatorConfig]
 
-    @root_validator(pre=True)
+    @model_validator(mode="before")
     def validate_config_lists(cls, values: dict[str, Any]) -> dict[str, Any]:
         """
         Validate lists of configuration dictionaries (e.g., preprocessors,
