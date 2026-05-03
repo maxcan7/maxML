@@ -59,4 +59,4 @@ select = ["E", "F", "W"]
 plugins = ["pydantic.mypy"]
 
 [tool.pytest.ini_options]
-addopts = "--cov=maxML --cov-report html --cov-fail-under=80"
+addopts = "--cov=maxML --cov-report html --cov-fail-under=100"

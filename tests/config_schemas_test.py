@@ -89,6 +89,14 @@ def test_optional_config_fields(
     ],
 )
 def test_invalid_config(override: dict, field_name: str):
-    """Test that invalid or missing type keys raise a KeyError."""
+    """
+    Test that invalid or missing type keys raise a KeyError.
+    """
     with pytest.raises(KeyError):
         PipelineConfig(**{**_BASE_CONFIG_DICT, **override})
+
+
+def test_validate_config_list_unknown_field():
+    """Test that _validate_config_list raises ValueError for an unknown field name."""
+    with pytest.raises(ValueError, match="Unknown config type"):
+        PipelineConfig._validate_config_list([], "unknown_field")

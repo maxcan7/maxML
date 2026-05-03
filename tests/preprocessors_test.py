@@ -4,6 +4,7 @@ from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 
 from maxML.config_schemas import PipelineConfig
+from maxML.config_schemas import PreprocessorConfig
 from maxML.config_schemas import load_config
 from maxML.preprocessors import ColumnTransformerPreprocessor
 from maxML.preprocessors import Preprocessor
@@ -82,22 +83,24 @@ def test_do_preprocessing_true(pipeline_config_path: str):
 
 
 @pytest.mark.parametrize(
-    "pipeline_config_path",
+    "preprocessor_config",
     [
         pytest.param(
-            "tests/test_configs/no_preprocessors.yaml",
-            id="no_preprocessors",
+            PreprocessorConfig(),
+            id="no_type_no_pipelines",
+        ),
+        pytest.param(
+            PreprocessorConfig(type="ColumnTransformerPreprocessor", pipelines=None),
+            id="type_set_no_pipelines",
         ),
     ],
 )
-def test_get_preprocessor_fn_invalid(pipeline_config_path: str):
+def test_get_preprocessor_fn_invalid(preprocessor_config: PreprocessorConfig):
     """
-    Test that the get_preprocessor function will return a KeyError if the preprocessor
-    or pipelines fields are None.
+    Test that get_preprocessor_fn raises a KeyError when type or pipelines are None.
     """
-    pipeline_config: PipelineConfig = load_config(pipeline_config_path)
     with pytest.raises(KeyError):
-        get_preprocessor_fn(pipeline_config.preprocessors[0])
+        get_preprocessor_fn(preprocessor_config)
 
 
 def compare_estimators(
@@ -216,3 +219,26 @@ def test_compose_preprocessor(
     pipeline_configs: PipelineConfig = load_config(pipeline_config_path)
     preprocessor = compose_preprocessor(pipeline_configs.preprocessors)
     compare_transformers(preprocessor, transformer_fixture)
+
+
+def test_compose_preprocessor_chained():
+    """
+    Test that compose_preprocessor correctly nests a preceding ColumnTransformer
+    as a transformer inside the next one when multiple preprocessors are given.
+    """
+    pipeline_dict = {
+        "name": "numeric",
+        "steps": [
+            {"name": "scaler", "sklearn_module": "sklearn.preprocessing.StandardScaler"}
+        ],
+        "columns": ["Age", "Income", "Years_of_Experience"],
+    }
+    config1 = PreprocessorConfig(
+        type="ColumnTransformerPreprocessor", pipelines=[pipeline_dict]
+    )
+    config2 = PreprocessorConfig(
+        type="ColumnTransformerPreprocessor", pipelines=[pipeline_dict]
+    )
+    preprocessor = compose_preprocessor([config1, config2])
+    assert isinstance(preprocessor, ColumnTransformer)
+    assert any(t[0] == "composed_preprocessor" for t in preprocessor.transformers)

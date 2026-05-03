@@ -98,7 +98,7 @@ def run(pipeline_config_path: str) -> None:
     # TODO: Add write (either dump evaluations or integrate with e.g. MLFlow)
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     try:
         pipeline_config_path = sys.argv[1]
     except IndexError:
