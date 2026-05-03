@@ -33,23 +33,24 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "black>=24.8.0",
-    "flake8>=7.1.1",
-    "Flake8-pyproject>=1.2.3",
     "mypy>=1.11.2",
     "pre-commit>=3.8.0",
     "pytest>=8.3.2",
     "pytest-cov>=5.0.0",
     "reorder-python-imports>=3.13.0",
+    "ruff>=0.6.0",
 ]
 
 [tool.hatch.version]
 path = "VERSION.txt"
 pattern = "(?P<version>.+)"
 
-[tool.flake8]
-max-line-length = 88
+[tool.ruff]
+line-length = 88
 exclude = [".venv", "build", "dist"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W"]
 
 [tool.mypy]
 plugins = ["pydantic.mypy"]
