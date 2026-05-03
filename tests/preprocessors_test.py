@@ -64,6 +64,27 @@ def test_do_preprocessing(pipeline_config_path: str):
     "pipeline_config_path",
     [
         pytest.param(
+            "tests/test_configs/columntransformer_logistic.yaml",
+            id="columntransformer",
+        ),
+        pytest.param(
+            "tests/test_configs/columntransformer_poly_logistic.yaml",
+            id="columntransformer_poly",
+        ),
+    ],
+)
+def test_do_preprocessing_true(pipeline_config_path: str):
+    """
+    Test that do_preprocessing returns True when preprocessors are configured.
+    """
+    pipeline_config: PipelineConfig = load_config(pipeline_config_path)
+    assert do_preprocessing(pipeline_config.preprocessors) is True
+
+
+@pytest.mark.parametrize(
+    "pipeline_config_path",
+    [
+        pytest.param(
             "tests/test_configs/no_preprocessors.yaml",
             id="no_preprocessors",
         ),
