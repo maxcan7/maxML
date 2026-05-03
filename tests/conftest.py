@@ -11,11 +11,11 @@ from sklearn.preprocessing import PolynomialFeatures
 from sklearn.preprocessing import RobustScaler
 from sklearn.preprocessing import StandardScaler
 
-from maxML.config_schemas import load_config
 from maxML.config_schemas import PipelineConfig
+from maxML.config_schemas import load_config
 from maxML.pipeline import load_data
-from maxML.preprocessors import compose_preprocessor
 from maxML.preprocessors import Preprocessor
+from maxML.preprocessors import compose_preprocessor
 
 
 def columntransformer_fixture() -> ColumnTransformer:

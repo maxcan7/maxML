@@ -1,13 +1,12 @@
 from pathlib import Path
 from typing import Any
-from typing import cast
 from typing import Optional
 from typing import TypeVar
+from typing import cast
 
 import yaml
 from pydantic import BaseModel
 from pydantic import model_validator
-
 
 ModelType = TypeVar("ModelType", bound=BaseModel)
 

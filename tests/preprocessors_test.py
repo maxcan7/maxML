@@ -4,14 +4,14 @@ from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import FeatureUnion
 from sklearn.pipeline import Pipeline
 
-from maxML.config_schemas import load_config
 from maxML.config_schemas import PipelineConfig
+from maxML.config_schemas import load_config
 from maxML.preprocessors import ColumnTransformerPreprocessor
+from maxML.preprocessors import FeatureUnionPreprocessor
+from maxML.preprocessors import Preprocessor
 from maxML.preprocessors import compose_preprocessor
 from maxML.preprocessors import do_preprocessing
-from maxML.preprocessors import FeatureUnionPreprocessor
 from maxML.preprocessors import get_preprocessor_fn
-from maxML.preprocessors import Preprocessor
 from tests.conftest import columntransformer_fixture
 from tests.conftest import featureunion_fixture
 

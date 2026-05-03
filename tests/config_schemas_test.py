@@ -1,10 +1,10 @@
 import pytest
 
 from maxML.config_schemas import EvaluatorConfig
-from maxML.config_schemas import load_config
 from maxML.config_schemas import ModelConfig
 from maxML.config_schemas import PipelineConfig
 from maxML.config_schemas import PreprocessorConfig
+from maxML.config_schemas import load_config
 
 
 @pytest.mark.parametrize(

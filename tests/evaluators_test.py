@@ -16,13 +16,12 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 
-from maxML.evaluators import do_evaluation
-from maxML.evaluators import evaluate
 from maxML.evaluators import EvaluatorConfig
-from maxML.evaluators import get_evaluator_fn
 from maxML.evaluators import LinearEvaluator
 from maxML.evaluators import LogisticEvaluator
-
+from maxML.evaluators import do_evaluation
+from maxML.evaluators import evaluate
+from maxML.evaluators import get_evaluator_fn
 
 ModelMixinType = type[ClassifierMixin | RegressorMixin]
 EvaluatorType = type[LogisticEvaluator | LinearEvaluator]

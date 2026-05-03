@@ -7,15 +7,14 @@ from sklearn.model_selection import train_test_split
 from sklearn.pipeline import FeatureUnion
 from sklearn.pipeline import Pipeline
 
-from maxML.config_schemas import load_config
 from maxML.config_schemas import ModelConfig
 from maxML.config_schemas import PipelineConfig
+from maxML.config_schemas import load_config
 from maxML.evaluators import do_evaluation
 from maxML.evaluators import evaluate
 from maxML.preprocessors import compose_preprocessor
 from maxML.preprocessors import do_preprocessing
 from maxML.utils import get_estimator_fn
-
 
 """
 Runner script for an end-to-end sklearn model pipeline using maxML.
