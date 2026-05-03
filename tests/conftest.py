@@ -3,7 +3,6 @@ import pandas as pd
 import pytest
 from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
-from sklearn.pipeline import FeatureUnion
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing import OrdinalEncoder
@@ -56,26 +55,18 @@ def columntransformer_fixture() -> ColumnTransformer:
     return ColumnTransformer(transformers=[numeric, nominal, ordinal])
 
 
-def featureunion_fixture() -> FeatureUnion:
-    """
-    Hard-coded FeatureUnion fixture which takes a ColumnTransformer as one of its
-    transformers in order to test both FeatureUnion and the ability of maxML
-    preprocessors to handle two Preprocessors.
-    """
-    columntransformer = ("columntransformer", columntransformer_fixture())
-    numeric_featureunion_pipeline = Pipeline(
+def columntransformer_poly_fixture() -> ColumnTransformer:
+    """Hard-coded ColumnTransformer fixture with multi-step numeric pipeline."""
+    numeric_pipeline = Pipeline(
         [
+            ("imputer", SimpleImputer(strategy="median")),
             ("robust_scaler", RobustScaler()),
             ("poly", PolynomialFeatures(include_bias=False)),
         ]
     )
-    numeric_featureunion_columns = ["Age", "Income", "Years_of_Experience"]
-    numeric_featureunion = (
-        "numeric",
-        numeric_featureunion_pipeline,
-        numeric_featureunion_columns,
-    )
-    return FeatureUnion(transformer_list=[columntransformer, numeric_featureunion])
+    numeric_columns = ["Age", "Income", "Years_of_Experience"]
+    numeric = ("numeric_poly", numeric_pipeline, numeric_columns)
+    return ColumnTransformer(transformers=[numeric])
 
 
 @pytest.fixture

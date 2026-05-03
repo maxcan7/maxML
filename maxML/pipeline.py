@@ -4,7 +4,6 @@ from pathlib import Path
 import pandas as pd
 from sklearn.compose import ColumnTransformer
 from sklearn.model_selection import train_test_split
-from sklearn.pipeline import FeatureUnion
 from sklearn.pipeline import Pipeline
 
 from maxML.config_schemas import ModelConfig
@@ -26,13 +25,19 @@ def get_y(df: pd.DataFrame, target: str) -> pd.Series:
     return df[target]
 
 
-def get_X(df: pd.DataFrame, target: str) -> pd.DataFrame:
-    """Subset dataframe removing target column."""
+def get_X(
+    df: pd.DataFrame, target: str, feature_columns: list[str] | None = None
+) -> pd.DataFrame:
+    """
+    Subset dataframe removing target column, optionally selecting specific features.
+    """
+    if feature_columns:
+        return df[feature_columns]
     return df.drop(target, axis=1)
 
 
 def create_model_pipeline(
-    model_config: ModelConfig, preprocessor: ColumnTransformer | FeatureUnion = None
+    model_config: ModelConfig, preprocessor: ColumnTransformer | None = None
 ) -> Pipeline:
     """
     Creates a scikit-learn Pipeline for a machine learning model.
@@ -59,6 +64,8 @@ def run(pipeline_config_path: str) -> None:
     """
     pipeline_config: PipelineConfig = load_config(pipeline_config_path)
     df = load_data(pipeline_config.input_path)
+    if pipeline_config.dropna:
+        df = df.dropna()
 
     preprocessor = None
     if do_preprocessing(pipeline_config.preprocessors):
@@ -68,7 +75,11 @@ def run(pipeline_config_path: str) -> None:
         model_config=pipeline_config.model, preprocessor=preprocessor
     )
 
-    X = get_X(df=df, target=pipeline_config.model.target)
+    X = get_X(
+        df=df,
+        target=pipeline_config.model.target,
+        feature_columns=pipeline_config.model.feature_columns,
+    )
     y = get_y(df=df, target=pipeline_config.model.target)
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, **pipeline_config.train_test_split

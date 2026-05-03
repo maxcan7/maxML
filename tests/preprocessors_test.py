@@ -1,19 +1,17 @@
 import pytest
 from sklearn.base import BaseEstimator
 from sklearn.compose import ColumnTransformer
-from sklearn.pipeline import FeatureUnion
 from sklearn.pipeline import Pipeline
 
 from maxML.config_schemas import PipelineConfig
 from maxML.config_schemas import load_config
 from maxML.preprocessors import ColumnTransformerPreprocessor
-from maxML.preprocessors import FeatureUnionPreprocessor
 from maxML.preprocessors import Preprocessor
 from maxML.preprocessors import compose_preprocessor
 from maxML.preprocessors import do_preprocessing
 from maxML.preprocessors import get_preprocessor_fn
 from tests.conftest import columntransformer_fixture
-from tests.conftest import featureunion_fixture
+from tests.conftest import columntransformer_poly_fixture
 
 
 @pytest.mark.parametrize(
@@ -25,9 +23,9 @@ from tests.conftest import featureunion_fixture
             id="columntransformer_preprocessor",
         ),
         pytest.param(
-            "tests/test_configs/two_preprocessors_logistic.yaml",
-            [ColumnTransformerPreprocessor, FeatureUnionPreprocessor],
-            id="two_preprocessors",
+            "tests/test_configs/columntransformer_poly_logistic.yaml",
+            [ColumnTransformerPreprocessor],
+            id="columntransformer_poly_preprocessor",
         ),
     ],
 )
@@ -120,35 +118,27 @@ def compare_pipelines(pipeline1: Pipeline, pipeline2: Pipeline) -> bool:
 
 
 def compare_transformers(
-    transformer1: ColumnTransformer | FeatureUnion,
-    transformer2: ColumnTransformer | FeatureUnion,
+    transformer1: ColumnTransformer,
+    transformer2: ColumnTransformer,
 ) -> bool:
     """
-    Compare two transformers (ColumnTransformer or FeatureUnion),
-    including their transformers/transformer_list and the pipelines
-    within each transformer.
+    Compare two ColumnTransformers, including their transformers and the
+    pipelines within each transformer.
     """
-    if not isinstance(transformer1, type(transformer2)):
-        return False
-    if isinstance(transformer1, ColumnTransformer):
-        transformers1 = transformer1.transformers
-        transformers2 = transformer2.transformers
-    elif isinstance(transformer1, FeatureUnion):
-        transformers1 = transformer1.transformer_list
-        transformers2 = transformer2.transformer_list
-    else:
-        return False  # Not a recognized transformer type
-
-    if len(transformers1) != len(transformers2):
+    if not isinstance(transformer1, ColumnTransformer) or not isinstance(
+        transformer2, ColumnTransformer
+    ):
         return False
 
-    for t1, t2 in zip(transformers1, transformers2):
-        # Compare the name, pipeline, and columns of each transformer
+    if len(transformer1.transformers) != len(transformer2.transformers):
+        return False
+
+    for t1, t2 in zip(transformer1.transformers, transformer2.transformers):
         if not all(
             [
-                t1[0] == t2[0],  # Compare names
-                compare_pipelines(t1[1], t2[1]),  # Compare pipelines
-                t1[2] == t2[2],  # Compare columns (if applicable)
+                t1[0] == t2[0],  # name
+                compare_pipelines(t1[1], t2[1]),  # pipeline
+                t1[2] == t2[2],  # columns
             ]
         ):
             return False
@@ -162,6 +152,11 @@ def compare_transformers(
             "tests/test_configs/columntransformer_logistic.yaml",
             columntransformer_fixture(),
             id="columntransformer_preprocessor",
+        ),
+        pytest.param(
+            "tests/test_configs/columntransformer_poly_logistic.yaml",
+            columntransformer_poly_fixture(),
+            id="columntransformer_poly_preprocessor",
         ),
     ],
 )
@@ -184,47 +179,18 @@ def test_ColumnTransformerPreprocessor_compose(
     "pipeline_config_path, transformer_fixture",
     [
         pytest.param(
-            "tests/test_configs/two_preprocessors_logistic.yaml",
-            featureunion_fixture(),
-            id="featureunion_preprocessor",
-        ),
-    ],
-)
-def test_FeatureUnionPreprocessor_compose(
-    pipeline_config_path: str, transformer_fixture: FeatureUnion
-):
-    """
-    Test that the FeatureUnionPreprocessor can compose the PipelineConfig into a
-    FeatureUnion.
-    """
-    pipeline_config: PipelineConfig = load_config(pipeline_config_path)
-    preprocessor = FeatureUnionPreprocessor.compose(pipeline_config.preprocessors[1])
-    assert isinstance(preprocessor, FeatureUnion)
-    compare_transformers(preprocessor, transformer_fixture)
-
-
-@pytest.mark.parametrize(
-    "pipeline_config_path, transformer_fixture",
-    [
-        pytest.param(
-            "tests/test_configs/two_preprocessors_logistic.yaml",
+            "tests/test_configs/columntransformer_logistic.yaml",
             columntransformer_fixture(),
             id="columntransformer_preprocessor",
         ),
-        # TODO: Test both composing ColumnTransformer into FeatureUnion and reverse.
-        # pytest.param(
-        #     "tests/test_configs/two_preprocessors_logistic.yaml",
-        #     featureunion_preprocessor_fixture(),
-        #     id="featureunion_preprocessor",
-        # ),
     ],
 )
 def test_compose_preprocessor(
-    pipeline_config_path: str, transformer_fixture: ColumnTransformer | FeatureUnion
+    pipeline_config_path: str, transformer_fixture: ColumnTransformer
 ):
     """
-    Test that the compose_preprocessor function can properly compose multiple
-    preprocessors into one.
+    Test that the compose_preprocessor function can properly compose a
+    ColumnTransformerPreprocessor from config.
     """
     pipeline_configs: PipelineConfig = load_config(pipeline_config_path)
     preprocessor = compose_preprocessor(pipeline_configs.preprocessors)

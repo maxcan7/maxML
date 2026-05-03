@@ -3,7 +3,6 @@ from typing import Optional
 from typing import Protocol
 
 from sklearn.compose import ColumnTransformer
-from sklearn.pipeline import FeatureUnion
 from sklearn.pipeline import Pipeline
 
 from maxML.config_schemas import PreprocessorConfig
@@ -14,18 +13,8 @@ class Preprocessor(Protocol):
     @staticmethod
     def compose(
         preprocessor_config: PreprocessorConfig,
-        preprocessor: Optional[ColumnTransformer | FeatureUnion] = None,
-    ) -> ColumnTransformer | FeatureUnion:
-        """
-        Protocol defines the interface for all Preprocessors.
-        Inputs:
-        preprocessor_config: Config for composing a Preprocessor.
-        preprocessor: Another ColumnTransformer or FeatureUnion that can be added as a
-                      transformer to the next preprocessor such that all maxML
-                      Pipelines can expect a single preprocessor as the composition of
-                      all preprocessors.
-        """
-        ...
+        preprocessor: Optional[ColumnTransformer] = None,
+    ) -> ColumnTransformer: ...
 
 
 class ColumnTransformerPreprocessor:
@@ -34,35 +23,14 @@ class ColumnTransformerPreprocessor:
         preprocessor_config: PreprocessorConfig,
         preprocessor: Optional[Preprocessor] = None,
     ) -> ColumnTransformer:
-        """
-        Parses the pipelines dicts into their Estimators and composes a
-        ColumnTransformer.
-        """
         transformers = _compose(preprocessor_config)
         if preprocessor:
             transformers.insert(0, ("composed_preprocessor", preprocessor))
         return ColumnTransformer(transformers=transformers)
 
 
-class FeatureUnionPreprocessor:
-    @staticmethod
-    def compose(
-        preprocessor_config: PreprocessorConfig,
-        preprocessor: Optional[Preprocessor] = None,
-    ) -> FeatureUnion:
-        """
-        Parses the pipelines dicts into their Estimators and composes a
-        FeatureUnion.
-        """
-        transformers = _compose(preprocessor_config)
-        if preprocessor:
-            transformers.insert(0, ("composed_preprocessor", preprocessor))
-        return FeatureUnion(transformer_list=transformers)
-
-
 PREPROCESSORS = {
     "ColumnTransformerPreprocessor": ColumnTransformerPreprocessor,
-    "FeatureUnionPreprocessor": FeatureUnionPreprocessor,
 }
 
 
@@ -105,10 +73,10 @@ def get_preprocessor_fn(preprocessor_config: PreprocessorConfig) -> Preprocessor
 
 def compose_preprocessor(
     preprocessor_configs: list[PreprocessorConfig],
-) -> ColumnTransformer | FeatureUnion:
+) -> ColumnTransformer:
     """
-    Loops over the list of preprocessor_configs, retrieves the appriate Preprocessor,
-    and composes the preprocessor instance i.e. ColumnTransformer or FeatureUnion.
+    Loops over the list of preprocessor_configs, retrieves the appropriate Preprocessor,
+    and composes the preprocessor instance i.e. ColumnTransformer.
 
     If there are multiple preprocessors, each preceding preprocessor is composed into
     the next, such that a single preprocessor as the composition of all preprocessors

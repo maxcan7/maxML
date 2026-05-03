@@ -1,4 +1,5 @@
 input_path: tests/test_data/gemini_sample_data.csv
+dropna: true
 preprocessors:
 train_test_split:
   test_size: 0.2
@@ -8,6 +9,10 @@ model:
   target: Purchased
   args:
     random_state: 42
+  feature_columns:
+    - Age
+    - Income
+    - Years_of_Experience
 evaluators:
   - type: LogisticEvaluator
     metrics:

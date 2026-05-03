@@ -10,7 +10,7 @@ from pydantic import model_validator
 
 ModelType = TypeVar("ModelType", bound=BaseModel)
 
-PREPROCESSORS = ["ColumnTransformerPreprocessor", "FeatureUnionPreprocessor"]
+PREPROCESSORS = ["ColumnTransformerPreprocessor"]
 PIPELINES_DICT_TYPE = list[dict[Any, Any]]
 PREPROCESSORS_LIST_TYPE = list[dict[str, str | PIPELINES_DICT_TYPE]]
 
@@ -26,6 +26,7 @@ class ModelConfig(BaseModel):
     module: str
     target: str
     args: Optional[dict[str, Any]] = None
+    feature_columns: Optional[list[str]] = None
 
 
 class PreprocessorConfig(BaseModel):
@@ -55,6 +56,7 @@ class PipelineConfig(BaseModel):
     train_test_split: dict[str, Any]  # TODO: Turn into Pydantic Schema.
     model: ModelConfig
     evaluators: list[EvaluatorConfig]
+    dropna: bool = False
 
     @model_validator(mode="before")
     def validate_config_lists(cls, values: dict[str, Any]) -> dict[str, Any]:
