@@ -10,6 +10,7 @@ from maxML.preprocessors import Preprocessor
 
 
 def test_get_X(test_config: PipelineConfig, test_data: pd.DataFrame) -> None:
+    """Test that get_X drops the target column from the DataFrame."""
     X = get_X(df=test_data, target=test_config.model.target)
     assert test_config.model.target not in X.columns
     pd.testing.assert_frame_equal(
@@ -28,6 +29,7 @@ def test_get_X_with_feature_columns(test_data: pd.DataFrame) -> None:
 
 
 def test_get_y(test_config: PipelineConfig, test_data: pd.DataFrame) -> None:
+    """Test that get_y returns only the target column as a Series."""
     y = get_y(df=test_data, target=test_config.model.target)
     assert y.name == test_config.model.target
     pd.testing.assert_series_equal(y, test_data[test_config.model.target])

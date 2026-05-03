@@ -15,6 +15,8 @@ from maxML.config_schemas import EvaluatorConfig
 
 
 class Evaluator(Protocol):
+    """Protocol defining the interface for all Evaluators."""
+
     @staticmethod
     def run(
         y_test: pd.DataFrame,
@@ -22,7 +24,7 @@ class Evaluator(Protocol):
         predictions: np.ndarray,
         pipeline: Optional[Pipeline] = None,
     ) -> dict[str, Any]:
-        """TODO"""
+        """Run evaluation and return a dict of metric names to values."""
         ...
 
 
@@ -34,7 +36,7 @@ class LogisticEvaluator:
         predictions: np.ndarray,
         pipeline: Pipeline,
     ) -> dict:
-        """TODO"""
+        """Run classification metrics: accuracy, classification report, and ROC AUC."""
         accuracy = accuracy_score(y_test, predictions)
         report = classification_report(y_test, predictions)
         roc_auc = roc_auc_score(y_test, pipeline.predict_proba(X_test)[:, 1])
@@ -54,7 +56,7 @@ class LinearEvaluator:
         predictions: np.ndarray,
         pipeline: Optional[Pipeline] = None,
     ) -> dict:
-        """TODO"""
+        """Run regression metrics: MSE, RMSE, and R-squared."""
         mse = mean_squared_error(y_test, predictions)
         rmse = np.sqrt(mse)
         r2 = r2_score(y_test, predictions)
@@ -89,7 +91,7 @@ def evaluate(
     predictions: np.ndarray,
     pipeline: Optional[Pipeline] = None,
 ) -> list[dict[str, Any]]:
-    """TODO"""
+    """Run all configured evaluators and return a list of metric dicts."""
     evaluations = []
     for evaluator_config in evaluator_configs:
         evaluator = get_evaluator_fn(evaluator_config)

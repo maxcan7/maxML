@@ -10,6 +10,8 @@ from maxML.utils import get_estimator_fn
 
 
 class Preprocessor(Protocol):
+    """Protocol defining the interface for all Preprocessors."""
+
     @staticmethod
     def compose(
         preprocessor_config: PreprocessorConfig,
@@ -23,6 +25,7 @@ class ColumnTransformerPreprocessor:
         preprocessor_config: PreprocessorConfig,
         preprocessor: Optional[Preprocessor] = None,
     ) -> ColumnTransformer:
+        """Parse pipeline dicts into Estimators and compose a ColumnTransformer."""
         transformers = _compose(preprocessor_config)
         if preprocessor:
             transformers.insert(0, ("composed_preprocessor", preprocessor))

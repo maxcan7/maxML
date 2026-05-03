@@ -18,11 +18,15 @@ EVALUATORS = ["LogisticEvaluator", "LinearEvaluator"]
 
 
 class EvaluatorConfig(BaseModel):
+    """Pydantic schema for a single evaluator config entry."""
+
     type: Optional[str] = None
     metrics: Optional[list[str]] = None
 
 
 class ModelConfig(BaseModel):
+    """Pydantic schema for the model config entry."""
+
     module: str
     target: str
     args: Optional[dict[str, Any]] = None
@@ -30,6 +34,8 @@ class ModelConfig(BaseModel):
 
 
 class PreprocessorConfig(BaseModel):
+    """Pydantic schema for a single preprocessor config entry."""
+
     type: Optional[str] = None
     pipelines: Optional[PIPELINES_DICT_TYPE] = None
 

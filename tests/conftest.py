@@ -71,14 +71,17 @@ def columntransformer_poly_fixture() -> ColumnTransformer:
 
 @pytest.fixture
 def test_preprocessor(test_config: PipelineConfig) -> Preprocessor:
+    """Compose and return a Preprocessor from the test_config fixture."""
     return compose_preprocessor(test_config.preprocessors)
 
 
 @pytest.fixture
 def test_data(test_config: PipelineConfig) -> pd.DataFrame:
+    """Load and return the test dataset as a DataFrame."""
     return load_data(test_config.input_path)
 
 
 @pytest.fixture
 def test_config() -> PipelineConfig:
+    """Load and return the columntransformer_logistic PipelineConfig."""
     return load_config("tests/test_configs/columntransformer_logistic.yaml")
