@@ -1,6 +1,6 @@
 [build-system]
-requires = ["setuptools >= 61.0"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [project]
 name = "maxML"
@@ -31,7 +31,7 @@ dependencies = [
   "scikit-learn>=1.5.1",
 ]
 
-[project.optional-dependencies]
+[dependency-groups]
 dev = [
     "black>=24.8.0",
     "flake8>=7.1.1",
@@ -43,11 +43,9 @@ dev = [
     "reorder-python-imports>=3.13.0",
 ]
 
-[tool.setuptools]
-packages = ["maxML"]
-
-[tool.setuptools.dynamic]
-version = {file = "VERSION.txt"}
+[tool.hatch.version]
+path = "VERSION.txt"
+pattern = "(?P<version>.+)"
 
 [tool.flake8]
 max-line-length = 88

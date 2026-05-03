@@ -29,11 +29,11 @@ The project utilizes scikit-learn Pipelines to streamline the preprocessing and 
 ## Usage
 
 1. **Install the package:**
-   * `pip install -e .` from root directory (recommended with conda or virtual environment of choice).
-   * `pip install -e .[dev]` if you want full dev features.
+   * `uv sync` from root directory installs the project and all dev dependencies.
+   * `uv sync --no-dev` to install only the runtime dependencies.
 
 2. **Run the code:**
-   * Execute the pipeline after installing: `python ./maxML/pipeline.py <path_to_yaml_config>`. It will:
+   * Execute the pipeline: `uv run python ./maxML/pipeline.py <path_to_yaml_config>`. It will:
      * Preprocess the data
      * Split the data into training and testing sets
      * Train the linear or logistic regression models
