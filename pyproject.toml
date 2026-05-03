@@ -1,5 +1,5 @@
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"
 
 [project]
@@ -41,8 +41,7 @@ dev = [
 ]
 
 [tool.hatch.version]
-path = "VERSION.txt"
-pattern = "(?P<version>.+)"
+source = "vcs"
 
 [tool.isort]
 force_single_line = true
